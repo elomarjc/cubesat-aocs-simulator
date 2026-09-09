@@ -33,6 +33,10 @@ export class SpaceScene {
       this.controls.dampingFactor = 0.05;
       this.controls.minDistance = 0.2;
       this.controls.maxDistance = 50.0;
+      this.controls.touches = {
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN
+      };
     }
 
     // 5. Lighting
