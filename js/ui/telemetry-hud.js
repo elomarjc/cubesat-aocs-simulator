@@ -145,10 +145,18 @@ export class TelemetryHUD {
       this.chartHistory.shift();
     }
 
-    const w = this.canvas.width = this.canvas.clientWidth;
-    const h = this.canvas.height = this.canvas.clientHeight;
-    const ctx = this.ctx;
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const w = this.canvas.clientWidth || 300;
+    const h = this.canvas.clientHeight || 80;
 
+    if (this.canvas.width !== Math.round(w * dpr) || this.canvas.height !== Math.round(h * dpr)) {
+      this.canvas.width = Math.round(w * dpr);
+      this.canvas.height = Math.round(h * dpr);
+    }
+
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, w, h);
 
     // Draw background grid lines
@@ -196,5 +204,6 @@ export class TelemetryHUD {
     const latest = this.chartHistory[this.chartHistory.length - 1];
     ctx.fillStyle = '#00e5ff';
     ctx.fillText(`${latest.rate.toFixed(2)} °/s`, w - 70, 14);
+    ctx.restore();
   }
 }
