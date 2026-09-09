@@ -1,0 +1,481 @@
+/* GomSpace Aerospace Dark Mission Operations Theme */
+:root {
+  --bg-deep: #050811;
+  --bg-panel: #0a1122;
+  --bg-panel-header: #0e172e;
+  --border-subtle: #182848;
+  --border-active: #00e5ff;
+  --text-main: #e2e8f0;
+  --text-dim: #798da3;
+  --accent-cyan: #00e5ff;
+  --accent-blue: #2979ff;
+  --accent-amber: #ffab00;
+  --accent-green: #00e676;
+  --accent-red: #ff1744;
+  --accent-magenta: #e040fb;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  user-select: none;
+}
+
+/* App Grid Layout */
+.app-container {
+  display: grid;
+  grid-template-rows: 52px 1fr 140px;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Top Header Bar */
+.top-nav {
+  background-color: var(--bg-panel-header);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 10;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  color: var(--accent-cyan);
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-badge {
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mission-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.badge-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.badge-item.active-gs {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  background: rgba(0, 230, 118, 0.1);
+  animation: pulse-border 1.5s infinite;
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Main Workspace */
+.workspace-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 3D Viewport Area */
+.viewport-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, #091226 0%, #03060c 100%);
+  overflow: hidden;
+}
+
+#three-canvas-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Viewport Overlays */
+.viewport-overlay-top {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+}
+
+.viewport-overlay-right {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 5;
+}
+
+.hud-pill {
+  background: rgba(10, 17, 34, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Vector legend */
+.vector-legend {
+  background: rgba(10, 17, 34, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Flight Computer Sidebar */
+.flight-sidebar {
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 5;
+}
+
+.panel-header {
+  background: var(--bg-panel-header);
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--accent-cyan);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-section {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+/* Flight Mode Buttons */
+.mode-selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.btn-mode {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  padding: 8px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.btn-mode .sub-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.btn-mode:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 229, 255, 0.06);
+}
+
+.btn-mode.active {
+  background: rgba(0, 229, 255, 0.14);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+}
+
+.btn-mode.active .sub-label {
+  color: #80f0ff;
+}
+
+/* Action buttons */
+.btn-action {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  padding: 7px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-action:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--text-dim);
+}
+
+.btn-danger {
+  border-color: rgba(255, 23, 68, 0.5);
+  color: #ff5252;
+}
+
+.btn-danger:hover {
+  background: rgba(255, 23, 68, 0.15);
+  border-color: var(--accent-red);
+}
+
+/* Telemetry Key-Values */
+.telem-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.telem-label {
+  color: var(--text-dim);
+}
+
+.telem-val {
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+/* Reaction Wheel & Magnetorquer Gauges */
+.gauge-container {
+  margin-bottom: 8px;
+}
+
+.gauge-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  margin-bottom: 3px;
+}
+
+.gauge-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: #121c33;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.gauge-bar-fill {
+  height: 100%;
+  background: var(--accent-cyan);
+  border-radius: 3px;
+  transition: width 0.08s linear;
+}
+
+.gauge-bar-fill.saturated {
+  background: var(--accent-red);
+}
+
+/* Bottom Telemetry Strip Chart Area */
+.bottom-strip {
+  background: var(--bg-panel-header);
+  border-top: 1px solid var(--border-subtle);
+  display: grid;
+  grid-template-columns: 240px 1fr 280px;
+  padding: 8px 14px;
+  gap: 14px;
+  z-index: 10;
+}
+
+.strip-metrics {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.strip-canvas-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 8, 17, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#chart-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.strip-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.slider-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.slider-group input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent-cyan);
+}
+
+/* Modal Window */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 680px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+}
+
+.modal-header {
+  padding: 14px 18px;
+  background: var(--bg-panel-header);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+}
+
+.modal-body {
+  padding: 18px;
+  overflow-y: auto;
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.modal-body h4 {
+  color: var(--accent-cyan);
+  margin: 14px 0 6px 0;
+}
+
+.modal-body code {
+  font-family: var(--font-mono);
+  background: rgba(0, 229, 255, 0.1);
+  color: var(--accent-cyan);
+  padding: 2px 6px;
+  border-radius: 3px;
+}

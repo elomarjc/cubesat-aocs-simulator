@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CubeSat AOCS Flight Simulator | 3D Interactive LEO Orbit & Attitude Control</title>
+  <meta name="description" content="Interactive 3D Attitude Determination & Control System (AOCS) flight simulator for Low Earth Orbit nanosatellites. Implements B-dot detumbling, reaction wheel nadir pointing, Sun tracking, and Aalborg ground station slew.">
+  
+  <link rel="stylesheet" href="css/aocs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Three.js CDN & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span>GOMSPACE</span>
+        </div>
+        <span class="brand-badge">AOCS FLIGHT SIMULATOR v2.4</span>
+        <span style="color: var(--text-dim); font-size: 11px;">3U NanoMind Architecture • AAU Heritage</span>
+      </div>
+
+      <div class="mission-badges">
+        <div class="badge-item" id="badge-gs">AALBORG GS: STANDBY</div>
+        <div class="badge-item" id="val-eclipse">☀️ SUNLIGHT</div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn-action" id="btn-export-csv">📥 EXPORT CSV</button>
+        <button class="btn-action" id="btn-export-json">📄 EXPORT JSON</button>
+        <button class="btn-action" id="btn-help">❓ HELP & SPECS</button>
+      </div>
+    </header>
+
+    <!-- Workspace Grid -->
+    <div class="workspace-grid">
+      
+      <!-- 3D Viewport -->
+      <div class="viewport-container">
+        <div id="three-canvas-container"></div>
+
+        <!-- Viewport Overlays -->
+        <div class="viewport-overlay-top">
+          <div class="hud-pill">
+            <span style="color: var(--text-dim);">CAMERA:</span>
+            <select id="select-view" style="background: transparent; color: var(--accent-cyan); border: none; font-family: var(--font-mono); font-size: 11px; cursor: pointer; outline: none;">
+              <option value="CHASER" style="background: #0a1122;">CHASER (SPACECRAFT)</option>
+              <option value="ORBITAL" style="background: #0a1122;">ORBITAL (GLOBAL EARTH)</option>
+            </select>
+          </div>
+
+          <div class="hud-pill">
+            <span style="color: var(--text-dim);">ORBIT:</span>
+            <select id="select-orbit" style="background: transparent; color: var(--accent-cyan); border: none; font-family: var(--font-mono); font-size: 11px; cursor: pointer; outline: none;">
+              <option value="SSO" style="background: #0a1122;">500 km SUN-SYNCHRONOUS (97.4°)</option>
+              <option value="ISS" style="background: #0a1122;">420 km ISS INCLINATION (51.6°)</option>
+              <option value="POLAR" style="background: #0a1122;">600 km POLAR (90.0°)</option>
+              <option value="EQUATORIAL" style="background: #0a1122;">500 km EQUATORIAL (0.0°)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="viewport-overlay-right">
+          <!-- Vector Overlays -->
+          <div class="vector-legend">
+            <div style="font-weight: 700; color: var(--accent-cyan); margin-bottom: 2px;">3D VECTOR OVERLAYS</div>
+            <label class="legend-item">
+              <input type="checkbox" id="chk-bfield" checked>
+              <span class="legend-dot" style="background: #ff00ff;"></span>
+              <span>Geomagnetic B (nT)</span>
+            </label>
+            <label class="legend-item">
+              <input type="checkbox" id="chk-sun" checked>
+              <span class="legend-dot" style="background: #ffd600;"></span>
+              <span>Sun Vector (s)</span>
+            </label>
+            <label class="legend-item">
+              <input type="checkbox" id="chk-nadir" checked>
+              <span class="legend-dot" style="background: #00e5ff;"></span>
+              <span>Nadir Target (-r)</span>
+            </label>
+            <label class="legend-item">
+              <input type="checkbox" id="chk-torque" checked>
+              <span class="legend-dot" style="background: #2979ff;"></span>
+              <span>Wheel Torque (τ)</span>
+            </label>
+            <label class="legend-item">
+              <input type="checkbox" id="chk-mtq" checked>
+              <span class="legend-dot" style="background: #ff6d00;"></span>
+              <span>MTQ Dipole (m)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Flight Computer Console -->
+      <aside class="flight-sidebar">
+        
+        <!-- Flight Mode FSM -->
+        <div class="panel-header">
+          <span>AOCS FLIGHT MODES</span>
+          <span style="font-size: 10px; color: var(--text-dim);">FINITE STATE MACHINE</span>
+        </div>
+        
+        <div class="panel-section">
+          <div class="mode-selector-grid">
+            <button class="btn-mode active" data-mode="DETUMBLE">
+              <span>B-DOT DETUMBLE</span>
+              <span class="sub-label">Magnetorquers • -k Ḃ</span>
+            </button>
+            <button class="btn-mode" data-mode="NADIR">
+              <span>NADIR POINTING</span>
+              <span class="sub-label">Earth Obs • Wheels PD</span>
+            </button>
+            <button class="btn-mode" data-mode="SUN_TRACK">
+              <span>SUN TRACKING</span>
+              <span class="sub-label">Max Solar Power • +Y</span>
+            </button>
+            <button class="btn-mode" data-mode="GS_TRACK">
+              <span>AALBORG GS SLEW</span>
+              <span class="sub-label">Antenna Boresight Track</span>
+            </button>
+          </div>
+
+          <button class="btn-mode" data-mode="DESAT" style="width: 100%; margin-bottom: 8px;">
+            <span>REACTION WHEEL DESATURATION</span>
+            <span class="sub-label">Magnetic Momentum Dump • m = -k (B × h) / |B|²</span>
+          </button>
+
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <button class="btn-action btn-danger" id="btn-tumble" style="flex: 1;">⚡ TUMBLE SATELLITE</button>
+            <button class="btn-action" id="btn-reset-wheels" style="flex: 1;">🔄 ZERO WHEELS</button>
+          </div>
+        </div>
+
+        <!-- Telemetry: Attitude & Dynamics -->
+        <div class="panel-header">
+          <span>ATTITUDE STATE & KINEMATICS</span>
+        </div>
+        <div class="panel-section">
+          <div class="telem-row">
+            <span class="telem-label">EULER [R, P, Y]:</span>
+            <span class="telem-val" id="val-euler">R:0.0° P:0.0° Y:0.0°</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">ANGULAR RATE |ω|:</span>
+            <span class="telem-val" id="val-rates">0.00°/s</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">QUATERNION [q]:</span>
+            <span class="telem-val" id="val-quat">[1.000, 0.000, 0.000, 0.000]</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">KINETIC ENERGY:</span>
+            <span class="telem-val" id="val-kinetic">0.00 mJ</span>
+          </div>
+        </div>
+
+        <!-- Actuators HUD: Reaction Wheels & Magnetorquers -->
+        <div class="panel-header">
+          <span>ACTUATORS STATE</span>
+        </div>
+        <div class="panel-section">
+          <div class="section-title">3-AXIS REACTION WHEELS (MAX 6500 RPM)</div>
+          
+          <div class="gauge-container">
+            <div class="gauge-label-row"><span>WHEEL X</span><span id="rw-val-x">0 RPM</span></div>
+            <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="rw-bar-x" style="width: 0%;"></div></div>
+          </div>
+          <div class="gauge-container">
+            <div class="gauge-label-row"><span>WHEEL Y</span><span id="rw-val-y">0 RPM</span></div>
+            <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="rw-bar-y" style="width: 0%;"></div></div>
+          </div>
+          <div class="gauge-container">
+            <div class="gauge-label-row"><span>WHEEL Z</span><span id="rw-val-z">0 RPM</span></div>
+            <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="rw-bar-z" style="width: 0%;"></div></div>
+          </div>
+
+          <div class="section-title" style="margin-top: 12px;">3-AXIS MAGNETORQUERS (MAX 0.2 A·m²)</div>
+          <div class="gauge-container">
+            <div class="gauge-label-row"><span>COIL X</span><span id="mtq-val-x">0.000 A·m²</span></div>
+            <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="mtq-bar-x" style="width: 0%; background: #ff6d00;"></div></div>
+          </div>
+          <div class="gauge-container">
+            <div class="gauge-label-row"><span>COIL Y</span><span id="mtq-val-y">0.000 A·m²</span></div>
+            <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="mtq-bar-y" style="width: 0%; background: #ff6d00;"></div></div>
+          </div>
+          <div class="gauge-container">
+            <div class="gauge-label-row"><span>COIL Z</span><span id="mtq-val-z">0.000 A·m²</span></div>
+            <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="mtq-bar-z" style="width: 0%; background: #ff6d00;"></div></div>
+          </div>
+        </div>
+
+        <!-- Orbit & Ground Station Telemetry -->
+        <div class="panel-header">
+          <span>ORBIT & AALBORG GS LINK</span>
+        </div>
+        <div class="panel-section">
+          <div class="telem-row">
+            <span class="telem-label">ALTITUDE:</span>
+            <span class="telem-val" id="val-alt">500.0 km</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">VELOCITY:</span>
+            <span class="telem-val" id="val-speed">7.61 km/s</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">TRUE ANOMALY:</span>
+            <span class="telem-val" id="val-anomaly">0.0°</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">GEOMAGNETIC |B|:</span>
+            <span class="telem-val" id="val-bfield">28,500 nT</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">GS ELEVATION:</span>
+            <span class="telem-val" id="val-gs-elev">-45.2°</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">GS SLANT RANGE:</span>
+            <span class="telem-val" id="val-gs-dist">9,420 km</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">LINK STATUS:</span>
+            <span class="telem-val" id="val-gs-link">LOS (OUT OF SIGHT)</span>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+
+    <!-- Bottom Telemetry Strip Chart -->
+    <footer class="bottom-strip">
+      <div class="strip-metrics">
+        <div style="font-weight: 700; color: var(--accent-cyan);">MISSION TELEMETRY STRIP</div>
+        <div style="color: var(--text-dim); font-size: 11px;">Sampling rate: 20 Hz (RK4 Integrator)</div>
+        <div style="color: var(--text-dim); font-size: 11px;">GomSpace CSP / CAN Bus Format</div>
+      </div>
+
+      <div class="strip-canvas-box">
+        <canvas id="chart-canvas"></canvas>
+      </div>
+
+      <div class="strip-controls">
+        <div class="slider-group">
+          <span style="color: var(--text-dim);">WARP:</span>
+          <input type="range" id="slider-timewarp" min="1" max="30" step="1" value="1">
+          <span id="val-timewarp" style="color: var(--accent-cyan); width: 32px;">1x</span>
+        </div>
+        <button class="btn-action" id="btn-pause" style="width: 100%;">⏸ PAUSE</button>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Help & Technical Whitepaper Modal -->
+  <div class="modal-overlay" id="help-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span>CubeSat AOCS Flight Simulator — Engineering Whitepaper</span>
+        <button class="btn-action" id="btn-close-modal" style="padding: 2px 8px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <h4>1. Spacecraft Architecture (3U CubeSat)</h4>
+        <p>This simulator models a 3U Low Earth Orbit nanosatellite with standard mass <code>m = 4.0 kg</code> and principal inertia tensor <code>I = diag(0.0419, 0.0419, 0.0067) kg·m²</code>. Actuators include 3-axis orthogonal reaction wheels (max torque 5 mN·m, max speed 6500 RPM) and 3-axis magnetorquer coils (max dipole 0.2 A·m²).</p>
+
+        <h4>2. Quaternion Attitude Kinematics & RK4 Dynamics</h4>
+        <p>Attitude is parametrized by unit quaternion <code>q = [q0, q1, q2, q3]</code> satisfying <code>||q|| = 1</code>. Solved numerically via 4th-order Runge-Kutta (RK4) integration coupled with Euler's rotational equations of motion:</p>
+        <p><code>I · dω/dt = τ_ext + τ_mtq - τ_rw - ω × (I·ω + h_rw)</code></p>
+
+        <h4>3. AOCS Control Algorithms</h4>
+        <ul>
+          <li><strong>B-Dot Detumbling Mode:</strong> Commanded dipole <code>m = -k · dB/dt</code>. Rapidly removes tip-off tumble spin energy post-deployment.</li>
+          <li><strong>Nadir Pointing Mode:</strong> Quaternion error feedback PD controller aligning satellite body with the local orbital LVLH frame (Earth-facing).</li>
+          <li><strong>Sun Tracking Mode:</strong> Optimizes solar panel normal vector alignment with the solar vector <code>s</code>.</li>
+          <li><strong>Aalborg Ground Station Tracking:</strong> Calculates line-of-sight to Aalborg (57.05°N, 9.92°E) and dynamically slews antenna boresight during overhead passes.</li>
+          <li><strong>Reaction Wheel Desaturation:</strong> Dumps excess wheel angular momentum via cross-product magnetic torque <code>m = -k · (B × h_rw) / ||B||²</code>.</li>
+        </ul>
+
+        <h4>4. Verification & Unit Tests</h4>
+        <p>Run headless tests locally: <code>node test/test_aocs_physics.mjs</code>. Tests verify 100% convergence across quaternion algebra, B-dot kinetic energy dissipation, and pointing accuracy.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

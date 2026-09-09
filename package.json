@@ -1,0 +1,25 @@
+{
+  "name": "cubesat-aocs-simulator",
+  "version": "1.0.0",
+  "description": "Interactive 3D Attitude Determination & Control System (AOCS) and LEO Flight Simulator for Nanosatellites",
+  "main": "js/app.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test/test_aocs_physics.mjs"
+  },
+  "keywords": [
+    "cubesat",
+    "aocs",
+    "adcs",
+    "spacecraft-dynamics",
+    "quaternion",
+    "bdot",
+    "reaction-wheels",
+    "threejs",
+    "orbital-mechanics",
+    "gomspace",
+    "aalborg-university"
+  ],
+  "author": "Jacob El-Omar",
+  "license": "MIT"
+}
