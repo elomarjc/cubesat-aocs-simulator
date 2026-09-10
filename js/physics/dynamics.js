@@ -203,7 +203,9 @@ export class SpacecraftDynamics {
       .scale(1 / 6);
     this.wheelOmega.add(dRW.scale(dt));
 
-    // Clamp wheel speeds to limits
+    // Clamp wheel speeds to limits and apply small bearing viscous dissipation
+    const wheelDecay = Math.exp(-0.015 * dt);
+    this.wheelOmega.scale(wheelDecay);
     this.wheelOmega.x = Math.max(-this.maxWheelOmega, Math.min(this.maxWheelOmega, this.wheelOmega.x));
     this.wheelOmega.y = Math.max(-this.maxWheelOmega, Math.min(this.maxWheelOmega, this.wheelOmega.y));
     this.wheelOmega.z = Math.max(-this.maxWheelOmega, Math.min(this.maxWheelOmega, this.wheelOmega.z));

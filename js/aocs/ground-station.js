@@ -13,31 +13,18 @@ export class GroundStationTracker {
   }
 
   computeCommand(currQ, currOmega, passInfo, rECI) {
-    if (!passInfo.hasLOS) {
-      // Standby damping mode if no line of sight
-      return {
-        cmdTorque: new Vector3(
-          Math.max(-this.maxTorque, Math.min(this.maxTorque, -this.kd * currOmega.x)),
-          Math.max(-this.maxTorque, Math.min(this.maxTorque, -this.kd * currOmega.y)),
-          Math.max(-this.maxTorque, Math.min(this.maxTorque, -this.kd * currOmega.z))
-        ),
-        pointingErrorDeg: 90.0,
-        linkMarginDb: 0.0,
-        activePass: false
-      };
-    }
-
     // Vector from satellite pointing directly TO the Aalborg Ground Station in ECI
     const losSatToGSECI = passInfo.losVectorECI.clone().scale(-1).normalize();
 
     // Transform into satellite body coordinates
     const losBody = currQ.inertialToBody(losSatToGSECI).normalize();
 
-    // Antenna boresight is aligned along +Z body
+    // Antenna boresight is aligned along +Z body (Earth-facing aperture)
     const antennaBoresight = new Vector3(0, 0, 1);
 
-    // Pointing error vector
-    const errorVector = antennaBoresight.cross(losBody);
+    // Pointing error vector: with netTorque = -tauRW, losBody x antennaBoresight
+    // commands reaction wheel torque that rotates antennaBoresight directly towards losBody
+    const errorVector = losBody.cross(antennaBoresight);
     const dot = Math.max(-1, Math.min(1, antennaBoresight.dot(losBody)));
     const pointingErrorDeg = Math.acos(dot) * (180 / Math.PI);
 
@@ -52,16 +39,16 @@ export class GroundStationTracker {
       Math.max(-this.maxTorque, Math.min(this.maxTorque, tauZ))
     );
 
-    // Realistic UHF/S-band link budget margin calculation
-    const distanceKm = passInfo.distanceKm;
+    // Realistic UHF/S-band link budget margin calculation (active pass when elevation >= 5 deg)
+    const distanceKm = Math.max(1, passInfo.distanceKm);
     const pathLossDb = 20 * Math.log10(distanceKm) + 20 * Math.log10(437.5) + 32.44;
-    const linkMarginDb = Math.max(0, 140.0 - pathLossDb - (pointingErrorDeg * 0.5));
+    const linkMarginDb = passInfo.hasLOS ? Math.max(0, 140.0 - pathLossDb - (pointingErrorDeg * 0.5)) : 0.0;
 
     return {
       cmdTorque,
       pointingErrorDeg,
       linkMarginDb,
-      activePass: true
+      activePass: !!passInfo.hasLOS
     };
   }
 }

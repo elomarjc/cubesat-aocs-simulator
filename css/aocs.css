@@ -416,7 +416,7 @@ body {
 /* Bottom Controls Area */
 .hud-bottom-area {
   position: absolute;
-  bottom: 8px;
+  bottom: max(12px, env(safe-area-inset-bottom));
   left: 8px;
   right: 8px;
   display: flex;
@@ -688,15 +688,16 @@ body {
   html, body {
     width: 100% !important;
     height: 100% !important;
+    height: 100dvh !important;
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #02050b !important;
   }
   .app-container {
-    width: 390px !important;
-    max-width: 390px !important;
-    height: 100vh !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
     height: 100dvh !important;
     margin: 0 !important;
     padding: 0 !important;

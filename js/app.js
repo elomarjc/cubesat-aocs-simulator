@@ -208,6 +208,8 @@ class CubeSatApp {
     if (mode === 'DETUMBLE') {
       this.bdot.reset();
     }
+    // Desaturate reaction wheels on mode transition for maximum agility
+    this.dynamics.resetWheels();
   }
 
 
@@ -392,7 +394,6 @@ class CubeSatApp {
     };
 
     document.getElementById('btn-hud-settings')?.addEventListener('click', openDrawer);
-    document.getElementById('btn-trigger-aocs-drawer')?.addEventListener('click', openDrawer);
     document.getElementById('btn-close-telemetry')?.addEventListener('click', closeDrawer);
     backdrop?.addEventListener('click', closeDrawer);
 
