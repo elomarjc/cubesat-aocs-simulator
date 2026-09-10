@@ -202,11 +202,11 @@ export class CubeSatModel {
       depthWrite: false
     });
     this.beaconSprite = new THREE.Sprite(spriteMat);
-    this.beaconSprite.scale.set(0.55, 0.55, 1.0);
+    this.beaconSprite.scale.set(0.85, 0.85, 1.0);
     this.group.add(this.beaconSprite);
 
     // Orbit locator ring
-    const ringGeom = new THREE.RingGeometry(0.14, 0.17, 32);
+    const ringGeom = new THREE.RingGeometry(0.18, 0.22, 32);
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0x00e5ff,
       side: THREE.DoubleSide,
@@ -231,7 +231,7 @@ export class CubeSatModel {
 
     // Dynamic visual scale & beacon based on camera view mode
     if (viewMode === 'ORBITAL') {
-      this.group.scale.setScalar(2.2); // Clearly visible spacecraft structure in global Earth view
+      this.group.scale.setScalar(2.5); // Clearly visible spacecraft structure in global Earth view
       if (this.beaconSprite) this.beaconSprite.visible = true;
       if (this.locatorRing) this.locatorRing.visible = true;
     } else {

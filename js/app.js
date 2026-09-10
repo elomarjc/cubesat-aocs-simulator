@@ -99,6 +99,20 @@ class CubeSatApp {
     });
 
     // Camera View Modes
+    // Vector popover menu toggle
+    const vecBtn = document.getElementById('btn-toggle-vectors');
+    const vecPopover = document.getElementById('vector-popover');
+    vecBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      vecPopover?.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!vecPopover?.contains(e.target) && e.target !== vecBtn) {
+        vecPopover?.classList.remove('open');
+      }
+    });
+
     document.getElementById('select-view')?.addEventListener('change', (e) => {
       this.scene.setViewMode(e.target.value, this.currentSat3DPos);
     });

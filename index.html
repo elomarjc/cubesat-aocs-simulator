@@ -6,7 +6,7 @@
   <title>CubeSat AOCS Flight Simulator | 3D Interactive LEO Orbit & Attitude Control</title>
   <meta name="description" content="Interactive 3D Attitude Determination & Control System (AOCS) flight simulator for Low Earth Orbit nanosatellites. Implements B-dot detumbling, reaction wheel nadir pointing, Sun tracking, and Aalborg ground station slew.">
   
-  <link rel="stylesheet" href="css/aocs.css">
+  <link rel="stylesheet" href="css/aocs.css?v=2.5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -53,56 +53,60 @@
       <div class="viewport-container">
         <div id="three-canvas-container"></div>
 
-        <!-- Viewport Overlays -->
-        <div class="viewport-overlay-top">
+        <!-- Streamlined Non-Obstructive Viewport Toolbar -->
+        <div class="viewport-toolbar">
           <div class="hud-pill">
-            <span style="color: var(--text-dim);">CAMERA:</span>
-            <select id="select-view" style="background: transparent; color: var(--accent-cyan); border: none; font-family: var(--font-mono); font-size: 11px; cursor: pointer; outline: none;">
-              <option value="ORBITAL" selected style="background: #0a1122;">ORBITAL (GLOBAL EARTH)</option>
-              <option value="CHASER" style="background: #0a1122;">CHASER (SPACECRAFT TRACK)</option>
+            <span class="pill-label">CAM:</span>
+            <select id="select-view" class="hud-select">
+              <option value="ORBITAL" selected>ORBITAL (GLOBAL)</option>
+              <option value="CHASER">CHASER (SATELLITE)</option>
             </select>
           </div>
 
           <div class="hud-pill">
-            <span style="color: var(--text-dim);">ORBIT:</span>
-            <select id="select-orbit" style="background: transparent; color: var(--accent-cyan); border: none; font-family: var(--font-mono); font-size: 11px; cursor: pointer; outline: none;">
-              <option value="SSO" style="background: #0a1122;">500 km SUN-SYNCHRONOUS (97.4°)</option>
-              <option value="ISS" style="background: #0a1122;">420 km ISS INCLINATION (51.6°)</option>
-              <option value="POLAR" style="background: #0a1122;">600 km POLAR (90.0°)</option>
-              <option value="EQUATORIAL" style="background: #0a1122;">500 km EQUATORIAL (0.0°)</option>
+            <span class="pill-label">ORBIT:</span>
+            <select id="select-orbit" class="hud-select">
+              <option value="SSO">500 km SSO (97.4°)</option>
+              <option value="ISS">420 km ISS (51.6°)</option>
+              <option value="POLAR">600 km POLAR (90°)</option>
+              <option value="EQUATORIAL">500 km EQUATORIAL (0°)</option>
             </select>
           </div>
-        </div>
 
-        <div class="viewport-overlay-right">
-          <!-- Vector Overlays -->
-          <div class="vector-legend">
-            <div style="font-weight: 700; color: var(--accent-cyan); margin-bottom: 2px;">3D VECTOR OVERLAYS</div>
-            <label class="legend-item">
-              <input type="checkbox" id="chk-bfield" checked>
-              <span class="legend-dot" style="background: #ff00ff;"></span>
-              <span>Geomagnetic B (nT)</span>
-            </label>
-            <label class="legend-item">
-              <input type="checkbox" id="chk-sun" checked>
-              <span class="legend-dot" style="background: #ffd600;"></span>
-              <span>Sun Vector (s)</span>
-            </label>
-            <label class="legend-item">
-              <input type="checkbox" id="chk-nadir" checked>
-              <span class="legend-dot" style="background: #00e5ff;"></span>
-              <span>Nadir Target (-r)</span>
-            </label>
-            <label class="legend-item">
-              <input type="checkbox" id="chk-torque" checked>
-              <span class="legend-dot" style="background: #2979ff;"></span>
-              <span>Wheel Torque (τ)</span>
-            </label>
-            <label class="legend-item">
-              <input type="checkbox" id="chk-mtq" checked>
-              <span class="legend-dot" style="background: #ff6d00;"></span>
-              <span>MTQ Dipole (m)</span>
-            </label>
+          <!-- Collapsible Vector Drawer -->
+          <div class="vector-menu-wrapper">
+            <button id="btn-toggle-vectors" class="hud-pill btn-vector-toggle">
+              <span>🎯 VECTORS</span>
+              <span id="vector-caret">▾</span>
+            </button>
+            <div class="vector-popover" id="vector-popover">
+              <div class="vector-popover-title">3D VECTORS</div>
+              <label class="legend-item">
+                <input type="checkbox" id="chk-bfield" checked>
+                <span class="legend-dot" style="background: #ff00ff;"></span>
+                <span>Geomagnetic B (nT)</span>
+              </label>
+              <label class="legend-item">
+                <input type="checkbox" id="chk-sun" checked>
+                <span class="legend-dot" style="background: #ffd600;"></span>
+                <span>Sun Vector (s)</span>
+              </label>
+              <label class="legend-item">
+                <input type="checkbox" id="chk-nadir" checked>
+                <span class="legend-dot" style="background: #00e5ff;"></span>
+                <span>Nadir Target (-r)</span>
+              </label>
+              <label class="legend-item">
+                <input type="checkbox" id="chk-torque" checked>
+                <span class="legend-dot" style="background: #2979ff;"></span>
+                <span>Wheel Torque (τ)</span>
+              </label>
+              <label class="legend-item">
+                <input type="checkbox" id="chk-mtq" checked>
+                <span class="legend-dot" style="background: #ff6d00;"></span>
+                <span>MTQ Dipole (m)</span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -298,6 +302,6 @@
   </div>
 
   <!-- Application Script -->
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/app.js?v=2.5"></script>
 </body>
 </html>

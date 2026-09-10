@@ -1,5 +1,6 @@
 /**
  * 3D Earth Globe with Procedural Continents, Atmosphere Glow, Orbit Path & Aalborg Ground Station
+ * High-fidelity texture with realistic continental landmasses, deserts, night city lights & ice caps.
  */
 
 import { CONSTANTS } from '../physics/orbit.js';
@@ -21,76 +22,163 @@ export class EarthVisualizer {
   }
 
   setupEarthMesh() {
-    // High-resolution procedural texture canvas for Earth continents and oceans
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    // Ocean deep blue gradient
+    // 1. Deep Ocean Gradient
     const oceanGrad = ctx.createLinearGradient(0, 0, 0, 512);
-    oceanGrad.addColorStop(0, '#0a2342');
-    oceanGrad.addColorStop(0.5, '#05192d');
-    oceanGrad.addColorStop(1, '#0a2342');
+    oceanGrad.addColorStop(0, '#06162d');
+    oceanGrad.addColorStop(0.3, '#092144');
+    oceanGrad.addColorStop(0.5, '#051833');
+    oceanGrad.addColorStop(0.7, '#092144');
+    oceanGrad.addColorStop(1, '#06162d');
     ctx.fillStyle = oceanGrad;
     ctx.fillRect(0, 0, 1024, 512);
 
-    // Draw stylized continental landmasses (Europe, Africa, Americas, Asia, Australia, Greenland)
-    ctx.fillStyle = '#1e3f20'; // Continental green
-    // Eurasia & Africa
-    ctx.beginPath();
-    ctx.ellipse(540, 200, 180, 100, 0.2, 0, Math.PI * 2); // Eurasia
-    ctx.fill();
-    ctx.fillStyle = '#3a5323';
-    ctx.beginPath();
-    ctx.ellipse(510, 310, 80, 110, -0.1, 0, Math.PI * 2); // Africa
-    ctx.fill();
-    // North & South America
-    ctx.fillStyle = '#2d4a22';
-    ctx.beginPath();
-    ctx.ellipse(250, 180, 90, 80, -0.2, 0, Math.PI * 2); // North America
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(310, 330, 60, 90, 0.2, 0, Math.PI * 2); // South America
-    ctx.fill();
-    // Australia
-    ctx.beginPath();
-    ctx.ellipse(800, 340, 45, 35, 0.1, 0, Math.PI * 2);
-    ctx.fill();
-    // Polar ice caps
-    ctx.fillStyle = '#e0f0ff';
-    ctx.fillRect(0, 0, 1024, 30); // Arctic
-    ctx.fillRect(0, 480, 1024, 32); // Antarctic
+    // Coastal shallow continental shelf (cyan glow around coastlines)
+    ctx.fillStyle = 'rgba(14, 61, 89, 0.4)';
 
-    // Latitude & Longitude grid lines (subtle cyan)
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)';
+    // Helper: equirectangular map coords (lon -180..180 -> x 0..1024, lat -90..90 -> y 512..0)
+    const mapPt = (lon, lat) => [((lon + 180) / 360) * 1024, ((90 - lat) / 180) * 512];
+
+    const drawPoly = (pts, fillStyle) => {
+      ctx.fillStyle = fillStyle;
+      ctx.beginPath();
+      for (let i = 0; i < pts.length; i++) {
+        const [x, y] = mapPt(pts[i][0], pts[i][1]);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+    };
+
+    // 2. Continents with realistic polygon coastlines
+    // Europe & Scandinavia & Denmark
+    drawPoly([
+      [-10, 36], [0, 37], [10, 38], [15, 40], [28, 41], [30, 46], [40, 47],
+      [45, 55], [35, 65], [25, 71], [15, 68], [8, 58], [12, 55], [5, 53],
+      [-5, 48], [-9, 43], [-10, 36]
+    ], '#1e4823');
+
+    // British Isles
+    drawPoly([[-10, 51], [-2, 50], [1, 53], [-2, 58], [-6, 58], [-10, 54]], '#23532a');
+
+    // Africa (Green equatorial + golden Sahara desert)
+    drawPoly([
+      [-17, 15], [-12, 28], [-5, 36], [10, 37], [25, 32], [32, 31], [43, 12],
+      [51, 11], [42, -5], [35, -20], [28, -34], [18, -34], [12, -18], [9, 4],
+      [-5, 5], [-17, 15]
+    ], '#254e22');
+
+    // Sahara Desert overlay
+    drawPoly([
+      [-16, 16], [-10, 30], [0, 35], [25, 32], [35, 28], [35, 15],
+      [20, 15], [0, 15], [-16, 16]
+    ], '#8c7744');
+
+    // Arabian Peninsula
+    drawPoly([[35, 29], [48, 30], [59, 24], [54, 16], [44, 13], [36, 22]], '#94804c');
+
+    // Asia & Siberia & China
+    drawPoly([
+      [40, 47], [50, 46], [60, 40], [70, 38], [75, 28], [80, 15], [90, 22],
+      [100, 18], [105, 10], [115, 22], [122, 30], [122, 40], [130, 43],
+      [142, 50], [170, 65], [175, 72], [100, 78], [60, 74], [45, 55]
+    ], '#244d23');
+
+    // India
+    drawPoly([[70, 24], [78, 8], [85, 20], [75, 28]], '#295b28');
+
+    // North America & Canada & Alaska
+    drawPoly([
+      [-168, 65], [-140, 70], [-100, 70], [-80, 72], [-65, 60], [-60, 46],
+      [-75, 35], [-80, 25], [-97, 26], [-105, 20], [-105, 30], [-120, 35],
+      [-125, 48], [-140, 58], [-165, 60]
+    ], '#234a22');
+
+    // Central America
+    drawPoly([[-105, 20], [-87, 13], [-77, 8], [-83, 10], [-97, 18]], '#295b28');
+
+    // South America (Amazon green + Andes)
+    drawPoly([
+      [-77, 8], [-60, 10], [-35, -5], [-38, -18], [-50, -32], [-65, -54],
+      [-75, -45], [-72, -20], [-81, -4], [-77, 8]
+    ], '#1e4823');
+
+    // Australia
+    drawPoly([
+      [114, -22], [122, -15], [136, -12], [148, -18], [152, -28], [150, -37],
+      [138, -35], [128, -32], [115, -34], [114, -22]
+    ], '#7d6a3e');
+
+    // Greenland (Ice sheet)
+    drawPoly([[-55, 60], [-25, 65], [-18, 76], [-30, 83], [-55, 82]], '#d8ebf7');
+
+    // Polar Ice Caps
+    ctx.fillStyle = '#e5f2fb';
+    ctx.fillRect(0, 0, 1024, 28); // Arctic Ice
+    ctx.fillRect(0, 460, 1024, 52); // Antarctic Ice Shelf
+
+    // 3. Subtle Night-Side City Lights (Golden speckles on continents)
+    ctx.fillStyle = 'rgba(255, 225, 130, 0.75)';
+    const cities = [
+      [540, 93], [520, 115], [512, 118], [518, 125], [530, 130], [550, 140],
+      [575, 110], [590, 135], [260, 140], [280, 150], [290, 160], [240, 165],
+      [820, 145], [840, 160], [860, 175], [890, 160], [740, 200], [780, 330]
+    ];
+    for (const [cx, cy] of cities) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 4. Subtle Atmospheric Cloud Bands
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.beginPath();
+    ctx.ellipse(300, 180, 180, 30, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(750, 200, 220, 35, -0.08, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(500, 350, 260, 25, 0.05, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 5. Latitude & Longitude grid lines
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.12)';
     ctx.lineWidth = 1;
     for (let x = 0; x <= 1024; x += 128) {
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, 512);
+      ctx.moveTo(x, 0); ctx.lineTo(x, 512);
       ctx.stroke();
     }
     for (let y = 0; y <= 512; y += 64) {
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(1024, y);
+      ctx.moveTo(0, y); ctx.lineTo(1024, y);
       ctx.stroke();
     }
 
-    // Aalborg pinpoint on canvas texture (approx lon 9.9E -> x=540, lat 57N -> y=93)
+    // Aalborg pinpoint beacon (9.92 E, 57.05 N -> x=540, y=93)
     ctx.fillStyle = '#ff1744';
     ctx.beginPath();
-    ctx.arc(540, 93, 4, 0, Math.PI * 2);
+    ctx.arc(540, 93, 4.5, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(540, 93, 7, 0, Math.PI * 2);
+    ctx.stroke();
 
     const earthTexture = new THREE.CanvasTexture(canvas);
 
     const earthGeom = new THREE.SphereGeometry(this.earthScale, 64, 64);
     const earthMat = new THREE.MeshStandardMaterial({
       map: earthTexture,
-      roughness: 0.8,
-      metalness: 0.1
+      roughness: 0.85,
+      metalness: 0.08
     });
 
     this.earthSphere = new THREE.Mesh(earthGeom, earthMat);
@@ -99,11 +187,11 @@ export class EarthVisualizer {
 
   setupAtmosphere() {
     // Glowing atmospheric rim
-    const atmoGeom = new THREE.SphereGeometry(this.earthScale * 1.025, 32, 32);
+    const atmoGeom = new THREE.SphereGeometry(this.earthScale * 1.028, 48, 48);
     const atmoMat = new THREE.MeshBasicMaterial({
-      color: 0x00b0ff,
+      color: 0x00d4ff,
       transparent: true,
-      opacity: 0.18,
+      opacity: 0.22,
       side: THREE.BackSide
     });
     this.atmosphere = new THREE.Mesh(atmoGeom, atmoMat);
@@ -115,8 +203,8 @@ export class EarthVisualizer {
     const orbitMat = new THREE.LineBasicMaterial({
       color: 0x00e5ff,
       transparent: true,
-      opacity: 0.65,
-      linewidth: 1.5
+      opacity: 0.7,
+      linewidth: 2
     });
     this.orbitLine = new THREE.Line(orbitGeom, orbitMat);
     this.scene.add(this.orbitLine);
@@ -135,7 +223,6 @@ export class EarthVisualizer {
     for (let i = 0; i <= segments; i++) {
       const t = (i / segments) * period;
       const st = orbitPropagator.getState(t);
-      // ECI to Three.js coordinates: X = x, Y = z, Z = -y
       positions[i * 3 + 0] = st.positionECI.x * scale;
       positions[i * 3 + 1] = st.positionECI.z * scale;
       positions[i * 3 + 2] = -st.positionECI.y * scale;
@@ -145,30 +232,29 @@ export class EarthVisualizer {
   }
 
   setupAalborgGroundStation() {
-    // 3D Pin / Beacon at Aalborg coordinates (Lat 57.05 N, Lon 9.92 E)
     this.gsGroup = new THREE.Group();
     this.earthGroup.add(this.gsGroup);
 
     // Marker beacon
-    const pinGeom = new THREE.ConeGeometry(0.04, 0.12, 16);
+    const pinGeom = new THREE.ConeGeometry(0.05, 0.14, 16);
     const pinMat = new THREE.MeshBasicMaterial({ color: 0xff1744 });
     const pinMesh = new THREE.Mesh(pinGeom, pinMat);
     pinMesh.rotation.x = Math.PI;
     this.gsGroup.add(pinMesh);
 
     // Radar elevation cone (5 degree mask)
-    const coneGeom = new THREE.ConeGeometry(0.35, 0.45, 24, 1, true);
+    const coneGeom = new THREE.ConeGeometry(0.38, 0.48, 24, 1, true);
     const coneMat = new THREE.MeshBasicMaterial({
       color: 0x00e676,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.16,
       wireframe: true
     });
     this.radarCone = new THREE.Mesh(coneGeom, coneMat);
-    this.radarCone.position.set(0, 0.22, 0);
+    this.radarCone.position.set(0, 0.24, 0);
     this.gsGroup.add(this.radarCone);
 
-    // Dynamic ground station communication beam to satellite
+    // Ground station communication beam
     const beamGeom = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(0, 0, 0),
       new THREE.Vector3(0, 1, 0)
@@ -176,23 +262,18 @@ export class EarthVisualizer {
     const beamMat = new THREE.LineBasicMaterial({
       color: 0x00e676,
       transparent: true,
-      opacity: 0.9,
-      linewidth: 2
+      opacity: 0.95,
+      linewidth: 2.5
     });
     this.commBeam = new THREE.Line(beamGeom, beamMat);
     this.commBeam.visible = false;
     this.scene.add(this.commBeam);
   }
 
-  /**
-   * Update Earth spin and Aalborg GS position in 3D scene
-   */
   update(simTime, sat3DPos, hasLOS, gsECI) {
-    // Rotate Earth around Y-axis based on sidereal rate
     const earthAngle = CONSTANTS.EARTH_ROTATION_RATE * simTime;
     this.earthSphere.rotation.y = earthAngle;
 
-    // Position Aalborg 3D beacon
     const lat = CONSTANTS.AALBORG_LAT;
     const lon = CONSTANTS.AALBORG_LON + earthAngle;
 
@@ -204,7 +285,6 @@ export class EarthVisualizer {
     this.gsGroup.position.set(gx, gy, gz);
     this.gsGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(gx, gy, gz).normalize());
 
-    // Update comm beam between Aalborg Ground Station and Satellite
     if (hasLOS && sat3DPos) {
       this.commBeam.visible = true;
       const positions = this.commBeam.geometry.attributes.position.array;
@@ -217,7 +297,6 @@ export class EarthVisualizer {
   }
 
   updateOrbitTrack(inclinationRad, altitudeMeters) {
-    // Backward compatibility if called without propagator
     const r3D = this.earthScale * (CONSTANTS.EARTH_RADIUS + altitudeMeters) / CONSTANTS.EARTH_RADIUS;
     this.orbitLine.rotation.x = inclinationRad - Math.PI / 2;
     this.orbitLine.scale.set(r3D / (this.earthScale * 1.078), r3D / (this.earthScale * 1.078), r3D / (this.earthScale * 1.078));

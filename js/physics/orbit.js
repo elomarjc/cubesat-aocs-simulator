@@ -24,7 +24,7 @@ export class OrbitPropagator {
     this.inclination = (options.inclinationDeg ?? 97.4) * (Math.PI / 180); // Sun-Synchronous Orbit
     this.raan = (options.raanDeg ?? 45.0) * (Math.PI / 180); // Right Ascension of Ascending Node
     this.argPerigee = (options.argPerigeeDeg ?? 0.0) * (Math.PI / 180);
-    this.trueAnomaly0 = (options.trueAnomalyDeg ?? 0.0) * (Math.PI / 180);
+    this.trueAnomaly0 = (options.trueAnomalyDeg ?? 120.0) * (Math.PI / 180);
 
     // Derived Keplerian quantities
     this.meanMotion = Math.sqrt(CONSTANTS.MU_EARTH / Math.pow(this.semiMajorAxis, 3)); // rad/s
