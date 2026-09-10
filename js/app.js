@@ -397,12 +397,58 @@ class CubeSatApp {
     backdrop?.addEventListener('click', closeDrawer);
 
     // Fullscreen Toggle
-    document.getElementById('btn-hud-fullscreen')?.addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen?.().catch(() => {});
+    // Robust Cross-Platform Fullscreen & iOS Safari Immersive Mode
+    const fsBtn = document.getElementById('btn-hud-fullscreen');
+    const updateFsIcon = (isFull) => {
+      if (!fsBtn) return;
+      if (isFull) {
+        fsBtn.innerHTML = '<svg fill="none" height="16" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24" width="16"><path d="M4 14h6v6m10-10h-6V4M14 10l7-7M10 14l-7 7"></path></svg>';
+        fsBtn.title = 'Exit Fullscreen';
+        fsBtn.classList.add('active');
       } else {
-        document.exitFullscreen?.().catch(() => {});
+        fsBtn.innerHTML = '<svg fill="none" height="16" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24" width="16"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>';
+        fsBtn.title = 'Toggle Fullscreen';
+        fsBtn.classList.remove('active');
       }
+    };
+
+    const toggleFullscreen = () => {
+      const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('immersive-fullscreen'));
+      if (isFull) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+        document.body.classList.remove('immersive-fullscreen');
+        updateFsIcon(false);
+      } else {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {
+            document.body.classList.add('immersive-fullscreen');
+            updateFsIcon(true);
+          });
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen();
+        } else {
+          // iOS Safari fallback: Immersive Fullscreen Mode
+          document.body.classList.add('immersive-fullscreen');
+          window.scrollTo(0, 1);
+        }
+        updateFsIcon(true);
+      }
+    };
+    fsBtn?.addEventListener('click', toggleFullscreen);
+
+    document.addEventListener('fullscreenchange', () => {
+      const isFull = !!document.fullscreenElement;
+      document.body.classList.toggle('immersive-fullscreen', isFull);
+      updateFsIcon(isFull);
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      const isFull = !!document.webkitFullscreenElement;
+      document.body.classList.toggle('immersive-fullscreen', isFull);
+      updateFsIcon(isFull);
     });
 
     // 6. Select Dropdown Text Sync

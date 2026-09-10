@@ -854,3 +854,223 @@ body {
   border-radius: 50%;
   flex-shrink: 0;
 }
+
+
+/* ========================================================= */
+/* Telemetry Drawer & Sidebar Engineering Avionics Styles    */
+/* ========================================================= */
+
+.flight-sidebar {
+  background: #070c18 !important;
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+}
+
+/* Panel Accordion Headers */
+.panel-header {
+  background: rgba(14, 23, 42, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-weight: 700 !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  color: var(--accent-cyan) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  margin-top: 6px !important;
+  margin-bottom: 4px !important;
+  user-select: none !important;
+  transition: all 0.15s ease !important;
+}
+.panel-header:hover {
+  border-color: rgba(0, 229, 255, 0.4) !important;
+  background: rgba(18, 30, 56, 0.95) !important;
+}
+.accordion-arrow {
+  font-size: 11px !important;
+  color: #64748b !important;
+  transition: transform 0.2s ease !important;
+}
+.panel-header.is-collapsed .accordion-arrow {
+  color: #94a3b8 !important;
+}
+
+/* Panel Sections */
+.panel-section {
+  padding: 8px 4px 10px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.panel-section.is-collapsed {
+  display: none !important;
+}
+
+.section-title {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  color: #94a3b8 !important;
+  margin-bottom: 6px !important;
+  letter-spacing: 0.4px !important;
+}
+
+/* Mode Selector Grid & Buttons (AVIONICS DARK THEME - NEVER WHITE!) */
+.mode-selector-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 6px !important;
+  margin-bottom: 6px !important;
+}
+
+.btn-mode {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
+  padding: 8px 10px !important;
+  border-radius: 6px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 3px !important;
+  text-align: left !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+.btn-mode:hover {
+  border-color: rgba(0, 229, 255, 0.5) !important;
+  background: rgba(22, 36, 66, 0.95) !important;
+  color: #00e5ff !important;
+}
+.btn-mode.active {
+  background: rgba(0, 229, 255, 0.14) !important;
+  border-color: #00e5ff !important;
+  color: #00e5ff !important;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.35) !important;
+}
+.btn-mode .sub-label {
+  font-size: 8px !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  line-height: 1.1 !important;
+}
+.btn-mode.active .sub-label {
+  color: #80f0ff !important;
+}
+
+/* Action Buttons (PAUSE, TUMBLE, ZERO WHEELS) */
+.btn-action {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
+  padding: 7px 12px !important;
+  border-radius: 6px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+.btn-action:hover {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-color: #00e5ff !important;
+  color: #00e5ff !important;
+}
+.btn-danger {
+  border-color: rgba(255, 23, 68, 0.4) !important;
+  color: #ff5252 !important;
+}
+.btn-danger:hover {
+  background: rgba(255, 23, 68, 0.15) !important;
+  border-color: var(--accent-red) !important;
+  box-shadow: 0 0 10px rgba(255, 23, 68, 0.3) !important;
+}
+
+/* Telemetry Key-Value Rows */
+.telem-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 4.5px 8px !important;
+  background: rgba(4, 8, 17, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 5px !important;
+  margin-bottom: 4px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 9.5px !important;
+}
+.telem-label {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+}
+.telem-val {
+  color: var(--accent-cyan) !important;
+  font-weight: 700 !important;
+}
+
+/* Reaction Wheel & Magnetorquer Gauges */
+.gauge-container {
+  margin-bottom: 7px !important;
+}
+.gauge-label-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 9px !important;
+  margin-bottom: 3px !important;
+  color: #cbd5e1 !important;
+}
+.gauge-bar-bg {
+  width: 100% !important;
+  height: 6px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 3px !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+.gauge-bar-fill {
+  height: 100% !important;
+  background: linear-gradient(to right, #2979ff, #00e5ff) !important;
+  border-radius: 3px !important;
+  transition: width 0.08s linear !important;
+}
+.gauge-bar-fill.saturated {
+  background: #ff1744 !important;
+}
+
+/* Immersive Fullscreen Mode (Universal Cross-Platform including iOS Safari) */
+body.immersive-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 999999 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #02050b !important;
+}
+body.immersive-fullscreen .top-nav {
+  display: none !important;
+}
+body.immersive-fullscreen .workspace-grid {
+  height: 100% !important;
+  height: 100dvh !important;
+}
+body.immersive-fullscreen .viewport-container {
+  height: 100% !important;
+}
