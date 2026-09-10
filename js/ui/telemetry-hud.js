@@ -18,6 +18,9 @@ export class TelemetryHUD {
     this.elGSDist = document.getElementById('val-gs-dist');
     this.elGSLink = document.getElementById('val-gs-link');
     this.badgeGS = document.getElementById('badge-gs');
+    this.elSSP = document.getElementById('val-ssp');
+    this.hudSSPVal = document.getElementById('hud-ssp-val');
+    this.hudSSPLink = document.getElementById('hud-ssp-link');
 
     // Reaction wheels bars
     this.barRWX = document.getElementById('rw-bar-x');
@@ -67,6 +70,17 @@ export class TelemetryHUD {
     }
 
     // 2. Orbital State
+    if (orbState.ssp) {
+      if (this.elSSP) this.elSSP.textContent = orbState.ssp.coordStr;
+      if (this.hudSSPVal) this.hudSSPVal.textContent = orbState.ssp.coordStr;
+    }
+    if (this.hudSSPLink) {
+      if (gsInfo.hasLOS) {
+        this.hudSSPLink.innerHTML = '<span style="color: var(--accent-green); font-weight: 700;">AOS (CONNECTED)</span>';
+      } else {
+        this.hudSSPLink.innerHTML = '<span style="color: var(--text-dim);">LOS (STANDBY)</span>';
+      }
+    }
     if (this.elAlt) this.elAlt.textContent = `${orbState.altitudeKm.toFixed(1)} km`;
     if (this.elSpeed) this.elSpeed.textContent = `${orbState.orbitalSpeedKms.toFixed(2)} km/s`;
     if (this.elAnomaly) this.elAnomaly.textContent = `${orbState.trueAnomalyDeg.toFixed(1)}°`;

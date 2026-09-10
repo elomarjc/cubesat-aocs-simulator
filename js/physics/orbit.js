@@ -61,6 +61,33 @@ export class OrbitPropagator {
    * Propagate orbit to elapsed time t (seconds)
    * Returns state in ECI (Earth-Centered Inertial) frame
    */
+  /**
+   * Compute instantaneous Sub-Satellite Point (SSP) geographic coordinates (WGS84 Lat/Lon)
+   */
+  getSubSatellitePoint(rECI, t) {
+    const rMag = rECI.length();
+    const latRad = Math.asin(Math.max(-1, Math.min(1, rECI.z / rMag)));
+    const latDeg = latRad * (180 / Math.PI);
+    const raRad = Math.atan2(rECI.y, rECI.x);
+    const gmst = (CONSTANTS.EARTH_ROTATION_RATE * t) % (2 * Math.PI);
+    let lonRad = raRad - gmst;
+    lonRad = ((lonRad + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+    const lonDeg = lonRad * (180 / Math.PI);
+
+    const latStr = `${Math.abs(latDeg).toFixed(2)}° ${latDeg >= 0 ? 'N' : 'S'}`;
+    const lonStr = `${Math.abs(lonDeg).toFixed(2)}° ${lonDeg >= 0 ? 'E' : 'W'}`;
+
+    return {
+      latRad,
+      lonRad,
+      latDeg,
+      lonDeg,
+      latStr,
+      lonStr,
+      coordStr: `${latStr}, ${lonStr}`
+    };
+  }
+
   getState(t) {
     this.simTime = t;
     const nu = this.trueAnomaly0 + this.meanMotion * t; // True anomaly for circular orbit
@@ -94,7 +121,8 @@ export class OrbitPropagator {
       trueAnomalyDeg: ((nu % (2 * Math.PI)) * 180 / Math.PI + 360) % 360,
       nadirECI,
       velocityDirECI,
-      orbitNormalECI
+      orbitNormalECI,
+      ssp: this.getSubSatellitePoint(rECI, t)
     };
   }
 

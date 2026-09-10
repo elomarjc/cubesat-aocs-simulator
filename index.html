@@ -6,7 +6,7 @@
   <title>CubeSat AOCS Flight Simulator | 3D Interactive LEO Orbit & Attitude Control</title>
   <meta name="description" content="Interactive 3D Attitude Determination & Control System (AOCS) flight simulator for Low Earth Orbit nanosatellites. Implements B-dot detumbling, reaction wheel nadir pointing, Sun tracking, and Aalborg ground station slew.">
   
-  <link rel="stylesheet" href="css/aocs.css?v=2.6">
+  <link rel="stylesheet" href="css/aocs.css?v=2.7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -107,6 +107,24 @@
                 <span>MTQ Dipole (m)</span>
               </label>
             </div>
+          </div>
+        </div>
+
+        <!-- Tactical Viewport Geographic Coordinates Banner -->
+        <div class="viewport-coord-banner" id="viewport-coord-banner">
+          <div class="coord-block">
+            <span class="coord-label">📍 <span class="label-full">SUB-SAT (</span>SSP<span class="label-full">)</span>:</span>
+            <span class="coord-value" id="hud-ssp-val">57.05° N, 09.92° E</span>
+          </div>
+          <div class="coord-divider">•</div>
+          <div class="coord-block">
+            <span class="coord-label">📡 <span class="label-full">AALBORG </span>GS:</span>
+            <span class="coord-value" style="color: var(--accent-green);">57.05° N, 09.92° E</span>
+          </div>
+          <div class="coord-divider">•</div>
+          <div class="coord-block">
+            <span class="coord-label">LINK:</span>
+            <span class="coord-value" id="hud-ssp-link">LOS (STANDBY)</span>
           </div>
         </div>
       </div>
@@ -215,6 +233,14 @@
         </div>
         <div class="panel-section">
           <div class="telem-row">
+            <span class="telem-label">SUB-SAT (SSP):</span>
+            <span class="telem-val" id="val-ssp" style="color: var(--accent-cyan); font-weight: 700;">57.05° N, 09.92° E</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">AALBORG GS CORD:</span>
+            <span class="telem-val" style="color: var(--accent-green); font-weight: 700;">57.05° N, 09.92° E</span>
+          </div>
+          <div class="telem-row">
             <span class="telem-label">ALTITUDE:</span>
             <span class="telem-val" id="val-alt">500.0 km</span>
           </div>
@@ -302,6 +328,6 @@
   </div>
 
   <!-- Application Script -->
-  <script type="module" src="js/app.js?v=2.6"></script>
+  <script type="module" src="js/app.js?v=2.7"></script>
 </body>
 </html>

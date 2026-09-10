@@ -703,3 +703,78 @@ body {
     font-size: 8px;
   }
 }
+
+/* Tactical Viewport Geographic Coordinates Banner */
+.viewport-coord-banner {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(8, 14, 28, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #ffffff;
+  z-index: 10;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.coord-block {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.coord-label {
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.coord-value {
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.coord-divider {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .viewport-coord-banner {
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    font-size: 8.8px;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .coord-block {
+    gap: 3px;
+  }
+  .coord-label {
+    font-size: 8px;
+  }
+  .coord-value {
+    font-size: 8.8px;
+  }
+  .label-full {
+    display: none;
+  }
+  .coord-block:nth-child(5) {
+    display: none; /* Hide LINK item on compact phone screens since AOS badge in header shows it */
+  }
+  .coord-divider:nth-child(4) {
+    display: none;
+  }
+}

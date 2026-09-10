@@ -54,6 +54,10 @@ console.log('\n=== 2. Testing Orbit Propagator & Ground Station ===');
   const sun = orbit.getSunVectorECI(0);
   assert(Math.abs(sun.length() - 1.0) < 1e-6, 'Sun unit vector has norm 1.0');
 
+  const ssp0 = orbit.getSubSatellitePoint(state0.positionECI, 0);
+  assert(typeof ssp0.latDeg === 'number' && typeof ssp0.lonDeg === 'number', 'Sub-Satellite Point (SSP) coordinates computed');
+  assert(Math.abs(ssp0.latDeg) <= 90.0 && Math.abs(ssp0.lonDeg) <= 180.0, 'SSP coordinates in valid WGS84 bounds [-90..90, -180..180]');
+
   const pass = orbit.getGroundStationPass(state0.positionECI, 0);
   assert(typeof pass.elevationDeg === 'number', 'Aalborg ground station elevation computed');
 }
