@@ -41,9 +41,12 @@ Engineered with aerospace-grade mathematical modeling, it reproduces the flight 
 * **Aalborg Ground Station Link**: 3D beacon at Aalborg ($57.05^\circ\text{N}, 9.92^\circ\text{E}$) with a $5^\circ$ minimum elevation radar cone and dynamic Acquisition of Signal (AOS) communication beam during orbital passes.
 
 ### 2. Spacecraft Kinematics & Rigid Body Dynamics
-* **Unit Quaternion Kinematics**: Parametrized via $\mathbf{q} = [q_0, q_1, q_2, q_3]^T$ satisfying $\|\mathbf{q}\| = 1$ to completely eliminate Euler angle gimbal lock.
+* **Unit Quaternion Kinematics**: Parametrized via $\mathbf{q} = [q_0, q_1, q_2, q_3]^T$ satisfying $\Vert \mathbf{q} \Vert = 1$ to completely eliminate Euler angle gimbal lock.
 * **Coupled Euler Rotational Equations**:
-  $$\mathbf{I} \dot{\boldsymbol{\omega}} + \boldsymbol{\omega} \times (\mathbf{I}\boldsymbol{\omega} + \mathbf{h}_{rw}) = \boldsymbol{\tau}_{dist} + \boldsymbol{\tau}_{mtq} - \boldsymbol{\tau}_{rw}$$
+
+$$
+\mathbf{I} \dot{\boldsymbol{\omega}} + \boldsymbol{\omega} \times (\mathbf{I}\boldsymbol{\omega} + \mathbf{h}_{rw}) = \boldsymbol{\tau}_{dist} + \boldsymbol{\tau}_{mtq} - \boldsymbol{\tau}_{rw}
+$$
 * **4th-Order Runge-Kutta (RK4) Solver**: Solves the 10-state differential vector $[\mathbf{q}, \boldsymbol{\omega}, \boldsymbol{\omega}_{rw}]$ with adaptive sub-stepping to guarantee numerical stability across $1\times$ to $30\times$ time warp speeds.
 * **Space Environment Disturbances**: Real-time models for Gravity Gradient torque ($\boldsymbol{\tau}_{gg}$), Aerodynamic drag in free molecular flow ($\boldsymbol{\tau}_{aero}$), and Solar Radiation Pressure ($\boldsymbol{\tau}_{srp}$).
 
@@ -55,10 +58,10 @@ Engineered with aerospace-grade mathematical modeling, it reproduces the flight 
 | **Nadir Pointing** | Lock payload camera to Earth center in LVLH frame | 3-axis Reaction Wheels | $\boldsymbol{\tau}_{rw} = K_p \mathbf{q}_{err,v} + K_d \boldsymbol{\omega}_{rel}$ |
 | **Sun Tracking** | Maximize solar array charging when outside eclipse | 3-axis Reaction Wheels | $\boldsymbol{\tau}_{rw} = K_p (\hat{\mathbf{n}}_{solar} \times \hat{\mathbf{s}}_{body}) + K_d \boldsymbol{\omega}$ |
 | **Aalborg GS Slew** | Dynamically slew antenna boresight to track ground station | 3-axis Reaction Wheels | $\boldsymbol{\tau}_{rw} = K_p (\hat{\mathbf{n}}_{ant} \times \hat{\boldsymbol{\rho}}_{LOS}) + K_d \boldsymbol{\omega}$ |
-| **Desaturation** | Dump accumulated reaction wheel momentum without fuel | 3-axis Magnetorquers | $\mathbf{m}_{desat} = -k_{dump} \frac{\mathbf{B}_{body} \times \mathbf{h}_{rw}}{\|\mathbf{B}_{body}\|^2}$ |
+| **Desaturation** | Dump accumulated reaction wheel momentum without fuel | 3-axis Magnetorquers | $\mathbf{m}_{desat} = -k_{dump} \frac{\mathbf{B}_{body} \times \mathbf{h}_{rw}}{\Vert\mathbf{B}_{body}\Vert^2}$ |
 
 ### 4. Telemetry Stream & GomSpace CSP/CAN Export
-* **Mission Telemetry Strip**: Live Canvas chart graphing total angular velocity damping $\|\boldsymbol{\omega}\|$ ($^\circ/\text{s}$) over time.
+* **Mission Telemetry Strip**: Live Canvas chart graphing total angular velocity damping $\Vert \boldsymbol{\omega} \Vert$ ($^\circ/\text{s}$) over time.
 * **Digital Gauges**: Reaction Wheel RPM meters (clamped to $\pm 6500\text{ RPM}$), Magnetorquer dipole meters (clamped to $\pm 0.2\text{ A}\cdot\text{m}^2$), attitude Euler angles, orbital parameters, and ground station slant range.
 * **One-Click Telemetry Export**: Download full mission flight logs in CSV or structured JSON formatted for **GomSpace CSP (CubeSat Space Protocol)** and CAN bus telemetry analysis.
 
@@ -68,20 +71,32 @@ Engineered with aerospace-grade mathematical modeling, it reproduces the flight 
 
 ### 1. Quaternion Kinematic Equation
 The attitude kinematics are propagated using the skew-symmetric quaternion rate matrix:
-$$\dot{\mathbf{q}} = \frac{1}{2} \boldsymbol{\Omega}(\boldsymbol{\omega}) \mathbf{q} = \frac{1}{2} \begin{bmatrix} 0 & -\omega_x & -\omega_y & -\omega_z \\ \omega_x & 0 & \omega_z & -\omega_y \\ \omega_y & -\omega_z & 0 & \omega_x \\ \omega_z & \omega_y & -\omega_x & 0 \end{bmatrix} \begin{bmatrix} q_0 \\ q_1 \\ q_2 \\ q_3 \end{bmatrix}$$
+
+$$
+\dot{\mathbf{q}} = \frac{1}{2} \boldsymbol{\Omega}(\boldsymbol{\omega}) \mathbf{q} = \frac{1}{2} \begin{bmatrix} 0 & -\omega_x & -\omega_y & -\omega_z \\ \omega_x & 0 & \omega_z & -\omega_y \\ \omega_y & -\omega_z & 0 & \omega_x \\ \omega_z & \omega_y & -\omega_x & 0 \end{bmatrix} \begin{bmatrix} q_0 \\ q_1 \\ q_2 \\ q_3 \end{bmatrix}
+$$
 
 ### 2. Earth Tilted Geomagnetic Dipole
 The geomagnetic field in Earth-Centered Inertial (ECI) coordinates is computed via the tilted dipole model:
-$$\mathbf{B}_{ECI}(\mathbf{r}) = \frac{B_0 R_E^3}{r^3} \left[ 3 (\hat{\mathbf{m}}_E \cdot \hat{\mathbf{r}}) \hat{\mathbf{r}} - \hat{\mathbf{m}}_E \right]$$
+
+$$
+\mathbf{B}_{ECI}(\mathbf{r}) = \frac{B_0 R_E^3}{r^3} \left[ 3 (\hat{\mathbf{m}}_E \cdot \hat{\mathbf{r}}) \hat{\mathbf{r}} - \hat{\mathbf{m}}_E \right]
+$$
+
 where $B_0 = 31.2\text{ }\mu\text{T}$, $R_E = 6371\text{ km}$, and $\hat{\mathbf{m}}_E(t)$ is the dipole unit vector tilted by $11.5^\circ$ rotating at the Earth sidereal rate $\omega_E = 7.292115 \times 10^{-5}\text{ rad/s}$.
 
 ### 3. B-Dot Detumbling Law
 Magnetorquers generate magnetic dipole moments proportional to the rate of change of the geomagnetic field vector measured in the spacecraft body frame:
-$$\mathbf{m}_{cmd} = -k \frac{d\mathbf{B}_{body}}{dt}$$
-generating a mechanical control torque $\boldsymbol{\tau}_{mtq} = \mathbf{m} \times \mathbf{B}_{body}$ that strictly guarantees negative rate of change for the spacecraft rotational kinetic energy:
-$$\frac{dE_{rot}}{dt} = \boldsymbol{\omega} \cdot \boldsymbol{\tau}_{mtq} = \boldsymbol{\omega} \cdot (\mathbf{m} \times \mathbf{B}) = -k \left\| \frac{d\mathbf{B}}{dt} \right\|^2 \le 0$$
 
----
+$$
+\mathbf{m}_{cmd} = -k \frac{d\mathbf{B}_{body}}{dt}
+$$
+
+generating a mechanical control torque $\boldsymbol{\tau}_{mtq} = \mathbf{m} \times \mathbf{B}_{body}$ that strictly guarantees negative rate of change for the spacecraft rotational kinetic energy:
+
+$$
+\frac{dE_{rot}}{dt} = \boldsymbol{\omega} \cdot \boldsymbol{\tau}_{mtq} = \boldsymbol{\omega} \cdot (\mathbf{m} \times \mathbf{B}) = -k \left\Vert \frac{d\mathbf{B}}{dt} \right\Vert^2 \le 0
+$$
 
 ## 🛠️ Codebase Architecture
 
