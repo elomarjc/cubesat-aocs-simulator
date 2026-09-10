@@ -6,7 +6,7 @@
   <title>CubeSat AOCS Flight Simulator | 3D Interactive LEO Orbit & Attitude Control</title>
   <meta name="description" content="Interactive 3D Attitude Determination & Control System (AOCS) flight simulator for Low Earth Orbit nanosatellites. Implements B-dot detumbling, reaction wheel nadir pointing, Sun tracking, and Aalborg ground station slew.">
   
-  <link rel="stylesheet" href="css/aocs.css?v=2.7">
+  <link rel="stylesheet" href="css/aocs.css?v=3.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -386,21 +386,41 @@
         </div>
     </div>
 
-    <!-- Modal Toggle Script -->
+    <!-- Floating Quick Guide Pill (Always visible & 1-tap accessible on mobile & desktop) -->
+    <button id="guideBtnFloating" class="btn-guide-floating" aria-label="Open Guide">💡 Tutorial & Problem Solved</button>
+
+    <!-- Modal Toggle & Auto-Open Script -->
     <script>
         (function() {
             const guideBtn = document.getElementById('guideBtn');
+            const guideBtnFloating = document.getElementById('guideBtnFloating');
             const guideModal = document.getElementById('guideModal');
             const guideClose = document.getElementById('guideClose');
             const guideStart = document.getElementById('guideStart');
 
-            function openModal() { if (guideModal) guideModal.classList.add('active'); }
-            function closeModal() { if (guideModal) guideModal.classList.remove('active'); }
+            function openModal() {
+                if (guideModal) {
+                    guideModal.classList.add('active');
+                    guideModal.style.opacity = '1';
+                    guideModal.style.pointerEvents = 'auto';
+                }
+            }
+
+            function closeModal() {
+                if (guideModal) {
+                    guideModal.classList.remove('active');
+                    guideModal.style.opacity = '0';
+                    guideModal.style.pointerEvents = 'none';
+                }
+                try {
+                    sessionStorage.setItem('guide_dismissed_' + window.location.pathname, '1');
+                } catch(e) {}
+            }
 
             if (guideBtn) guideBtn.addEventListener('click', openModal);
+            if (guideBtnFloating) guideBtnFloating.addEventListener('click', openModal);
             if (guideClose) guideClose.addEventListener('click', closeModal);
             if (guideStart) guideStart.addEventListener('click', closeModal);
-            if (window.location.search.indexOf('guide') !== -1) openModal();
 
             if (guideModal) {
                 guideModal.addEventListener('click', function(e) {
@@ -413,6 +433,17 @@
                     closeModal();
                 }
             });
+
+            // Auto-open on initial visit for immediate problem & tutorial clarity on both mobile and desktop
+            try {
+                const dismissed = sessionStorage.getItem('guide_dismissed_' + window.location.pathname);
+                const forceOpen = window.location.search.indexOf('guide') !== -1;
+                if (!dismissed || forceOpen) {
+                    setTimeout(openModal, 120);
+                }
+            } catch(e) {
+                setTimeout(openModal, 120);
+            }
         })();
     </script>
 
