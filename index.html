@@ -20,135 +20,253 @@
 <header class="top-nav">
 <div class="brand-section">
 <div class="brand-logo">
-<svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+<svg class="brand-icon" fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18">
 <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
 <polyline points="2 17 12 22 22 17"></polyline>
 <polyline points="2 12 12 17 22 12"></polyline>
 </svg>
-<span>3U CUBESAT AOCS</span>
+<span class="brand-title">3U SAT AOCS</span>
+<span class="live-status-dot" title="Telemetry Live"></span>
 </div>
-<span class="brand-badge">AOCS FLIGHT SIMULATOR v2.4</span>
-<span style="color: var(--text-dim); font-size: 11px;">3U Nanosatellite Architecture • Aalborg Space Heritage</span>
+<span class="brand-subtitle">3U Nanosatellite Architecture • Aalborg Space Heritage</span>
 </div>
-<div class="mission-badges">
-<div class="badge-item" id="badge-gs">AALBORG GS: STANDBY</div>
-<div class="badge-item" id="val-eclipse">☀️ SUNLIGHT</div>
+<div class="top-nav-status">
+<span class="aocs-flight-pill">AOCS FLIGHT</span>
+<div class="sys-telemetry-icons">
+<svg class="icon-signal" fill="currentColor" height="13" viewbox="0 0 24 24" width="14">
+<rect height="6" rx="1" width="3" x="2" y="16"></rect>
+<rect height="10" rx="1" width="3" x="7" y="12"></rect>
+<rect height="14" rx="1" width="3" x="12" y="8"></rect>
+<rect height="18" rx="1" width="3" x="17" y="4"></rect>
+</svg>
+<svg class="icon-wifi" fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="14">
+<path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+<path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+<path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+<circle cx="12" cy="20" r="1" fill="currentColor"></circle>
+</svg>
+<div class="battery-status">
+<svg class="icon-battery" fill="none" height="13" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="16">
+<rect height="12" rx="2" width="17" x="2" y="6"></rect>
+<path d="M21 10v4"></path>
+<rect fill="#00e5ff" height="8" width="9" x="4" y="8"></rect>
+</svg>
+<span class="battery-pct">52%</span>
 </div>
-<div class="header-actions">
-<button class="btn-guide" id="guideBtn">🎮 Guided Tour</button>
-<button class="btn-action" id="btn-export-csv">📥 EXPORT CSV</button>
-<button class="btn-action" id="btn-export-json">📄 EXPORT JSON</button>
-<button class="btn-action" id="btn-help">❓ HELP &amp; SPECS</button>
+</div>
 </div>
 </header>
 <!-- Workspace Grid -->
 <div class="workspace-grid">
-<!-- 3D Viewport -->
+<!-- 3D Viewport with Floating Mission HUD -->
 <div class="viewport-container live-sticky-screen">
 <div id="three-canvas-container"></div>
-<!-- Streamlined Non-Obstructive Viewport Toolbar -->
-<div class="viewport-toolbar">
-<div class="hud-pill">
-<span class="pill-label">CAM:</span>
-<select class="hud-select" id="select-view">
-<option selected="" value="ORBITAL">ORBITAL (GLOBAL)</option>
-<option value="CHASER">CHASER (SATELLITE)</option>
-</select>
-</div>
-<div class="hud-pill">
-<span class="pill-label">ORBIT:</span>
-<select class="hud-select" id="select-orbit">
-<option value="SSO">500 km SSO (97.4°)</option>
-<option value="ISS">420 km ISS (51.6°)</option>
-<option value="POLAR">600 km POLAR (90°)</option>
-<option value="EQUATORIAL">500 km EQUATORIAL (0°)</option>
-</select>
-</div>
-<!-- Collapsible Vector Drawer -->
-<div class="vector-menu-wrapper">
-<button class="hud-pill btn-vector-toggle" id="btn-toggle-vectors">
-<span>🎯 VECTORS</span>
-<span id="vector-caret">▾</span>
-</button>
-<div class="vector-popover" id="vector-popover">
-<div class="vector-popover-title">3D VECTORS</div>
-<label class="legend-item">
-<input checked="" id="chk-bfield" type="checkbox"/>
-<span class="legend-dot" style="background: #ff00ff;"></span>
-<span>Geomagnetic B (nT)</span>
-</label>
-<label class="legend-item">
-<input checked="" id="chk-sun" type="checkbox"/>
-<span class="legend-dot" style="background: #ffd600;"></span>
-<span>Sun Vector (s)</span>
-</label>
-<label class="legend-item">
-<input checked="" id="chk-nadir" type="checkbox"/>
-<span class="legend-dot" style="background: #00e5ff;"></span>
-<span>Nadir Target (-r)</span>
-</label>
-<label class="legend-item">
-<input checked="" id="chk-torque" type="checkbox"/>
-<span class="legend-dot" style="background: #2979ff;"></span>
-<span>Wheel Torque (τ)</span>
-</label>
-<label class="legend-item">
-<input checked="" id="chk-mtq" type="checkbox"/>
-<span class="legend-dot" style="background: #ff6d00;"></span>
-<span>MTQ Dipole (m)</span>
-</label>
-</div>
-</div>
-<!-- Collapsible Sim & Time Warp Popover -->
-<div class="vector-menu-wrapper">
-<button class="hud-pill btn-vector-toggle" id="btn-toggle-warp">
-<span>⏱️ <span class="val-timewarp-badge">1x</span> WARP</span>
-<span id="warp-caret">▾</span>
-</button>
-<div class="vector-popover" id="warp-popover" style="min-width: 220px;">
-<div class="vector-popover-title">SIMULATION SPEED &amp; TIME WARP</div>
-<div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-<span style="color: var(--text-dim); font-size: 11px;">WARP:</span>
-<input class="slider-timewarp-input" id="slider-timewarp-quick" max="30" min="1" step="1" type="range" value="1" style="flex: 1;" />
-<span class="val-timewarp-text" id="val-timewarp-quick" style="color: var(--accent-cyan); font-weight: bold; width: 32px; text-align: right;">1x</span>
-</div>
-<div style="display: flex; gap: 6px;">
-<button class="btn-action btn-pause-toggle" id="btn-pause-quick" style="flex: 1; padding: 5px 6px; font-size: 11px;">⏸ PAUSE</button>
-<button class="btn-action btn-danger btn-tumble-trigger" id="btn-tumble-quick" style="flex: 1; padding: 5px 6px; font-size: 11px;">⚡ TUMBLE</button>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Tactical Viewport Geographic Coordinates Banner -->
-<div class="viewport-coord-banner" id="viewport-coord-banner">
-<div class="coord-block">
-<span class="coord-label">📍 <span class="label-full">SUB-SAT (</span>SSP<span class="label-full">)</span>:</span>
-<span class="coord-value" id="hud-ssp-val">57.05° N, 09.92° E</span>
-</div>
-<div class="coord-divider">•</div>
-<div class="coord-block">
-<span class="coord-label">📡 <span class="label-full">AALBORG </span>GS:</span>
-<span class="coord-value" style="color: var(--accent-green);">57.05° N, 09.92° E</span>
-</div>
-<div class="coord-divider">•</div>
-<div class="coord-block">
-<span class="coord-label">LINK:</span>
-<span class="coord-value" id="hud-ssp-link">LOS (STANDBY)</span>
-</div>
+
+<!-- Floating Spacecraft HUD Overlay -->
+<div class="hud-overlay-layer">
+
+  <!-- Top-Left HUD Controls -->
+  <div class="hud-top-left">
+    <!-- CAM Pill -->
+    <div class="hud-pill-box">
+      <div class="hud-pill-inner">
+        <svg class="hud-pill-icon" fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="13">
+          <circle cx="12" cy="12" r="10"></circle>
+          <circle cx="12" cy="12" r="3"></circle>
+          <line x1="12" x2="12" y1="2" y2="5"></line>
+          <line x1="12" x2="12" y1="19" y2="22"></line>
+          <line x1="2" x2="5" y1="12" y2="12"></line>
+          <line x1="19" x2="22" y1="12" y2="12"></line>
+        </svg>
+        <div class="hud-text-stack">
+          <span class="hud-mini-label">CAM</span>
+          <span class="hud-val-text" id="hud-cam-label">ORBITAL (GLOBAL)</span>
+        </div>
+        <span class="hud-caret">▾</span>
+        <select class="hud-hidden-select" id="select-view">
+          <option selected="" value="ORBITAL">ORBITAL (GLOBAL)</option>
+          <option value="CHASER">CHASER (SATELLITE)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ORBIT Pill -->
+    <div class="hud-pill-box">
+      <div class="hud-pill-inner">
+        <svg class="hud-pill-icon" fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="13">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <div class="hud-text-stack">
+          <span class="hud-mini-label">ORBIT</span>
+          <span class="hud-val-text" id="hud-orbit-label">500 km SSO (97.4°)</span>
+        </div>
+        <span class="hud-caret">▾</span>
+        <select class="hud-hidden-select" id="select-orbit">
+          <option selected="" value="SSO">500 km SSO (97.4°)</option>
+          <option value="ISS">420 km ISS (51.6°)</option>
+          <option value="POLAR">600 km POLAR (90°)</option>
+          <option value="EQUATORIAL">500 km EQUATORIAL (0°)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Sub-row: Vectors & Warp HUD Pills -->
+    <div class="hud-tags-row">
+      <div class="hud-tag-wrapper">
+        <button class="hud-tag-pill active" id="btn-toggle-vectors">
+          <svg fill="none" height="12" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="12">
+            <circle cx="6" cy="6" r="3"></circle>
+            <circle cx="18" cy="18" r="3"></circle>
+            <line x1="8.5" x2="15.5" y1="8.5" y2="15.5"></line>
+          </svg>
+          <span>VECTORS</span>
+          <span class="hud-dot-active" id="vectors-dot">●</span>
+        </button>
+        <div class="vector-popover" id="vector-popover">
+          <div class="vector-popover-title">3D VECTORS</div>
+          <label class="legend-item"><input checked="" id="chk-bfield" type="checkbox"/><span class="legend-dot" style="background: #ff00ff;"></span><span>Geomagnetic B (nT)</span></label>
+          <label class="legend-item"><input checked="" id="chk-sun" type="checkbox"/><span class="legend-dot" style="background: #ffd600;"></span><span>Sun Vector (s)</span></label>
+          <label class="legend-item"><input checked="" id="chk-nadir" type="checkbox"/><span class="legend-dot" style="background: #00e5ff;"></span><span>Nadir Target (-r)</span></label>
+          <label class="legend-item"><input checked="" id="chk-torque" type="checkbox"/><span class="legend-dot" style="background: #2979ff;"></span><span>Wheel Torque (τ)</span></label>
+          <label class="legend-item"><input checked="" id="chk-mtq" type="checkbox"/><span class="legend-dot" style="background: #ff6d00;"></span><span>MTQ Dipole (m)</span></label>
+        </div>
+      </div>
+
+      <div class="hud-tag-wrapper">
+        <button class="hud-tag-pill" id="btn-toggle-warp">
+          <svg fill="none" height="12" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="12">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span id="hud-warp-pill-val">1x WARP</span>
+          <span class="hud-dot-dim">○</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top-Right Floating Actions Cluster (Menu, Settings, Fullscreen) -->
+  <div class="hud-top-right">
+    <button class="hud-circle-btn" id="btn-hud-menu" title="Engineering Whitepaper & Specifications">
+      <svg fill="none" height="16" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24" width="16"><line x1="3" x2="21" y1="6" y2="6"></line><line x1="3" x2="21" y1="12" y2="12"></line><line x1="3" x2="21" y1="18" y2="18"></line></svg>
+    </button>
+    <button class="hud-circle-btn" id="btn-hud-settings" title="Actuators & Detailed Telemetry">
+      <svg fill="none" height="16" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24" width="16"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    </button>
+    <button class="hud-circle-btn" id="btn-hud-fullscreen" title="Toggle Fullscreen">
+      <svg fill="none" height="16" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24" width="16"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+    </button>
+  </div>
+
+  <!-- Left Vertical SPEED HUD Slider -->
+  <div class="hud-vertical-rail hud-left-rail">
+    <div class="hud-rail-top">
+      <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="14"><circle cx="12" cy="12" r="10"></circle><polygon points="12 6 12 12 16 14"></polygon></svg>
+      <span class="hud-rail-title">SPEED</span>
+    </div>
+    <div class="hud-rail-track-container" id="speed-rail-container">
+      <div class="hud-rail-track">
+        <div class="hud-rail-fill" id="speed-rail-fill"></div>
+        <div class="hud-rail-thumb" id="speed-rail-thumb"></div>
+      </div>
+      <input class="hud-rail-range slider-timewarp-input" id="slider-speed-vertical" max="30" min="1" step="1" type="range" value="1"/>
+    </div>
+    <div class="hud-rail-val-pill val-timewarp-text" id="val-speed-pill">1x</div>
+  </div>
+
+  <!-- Right Vertical TIME HUD Slider -->
+  <div class="hud-vertical-rail hud-right-rail">
+    <div class="hud-rail-top">
+      <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="14"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 10"></polyline></svg>
+      <span class="hud-rail-title">TIME</span>
+    </div>
+    <div class="hud-rail-track-container" id="time-rail-container">
+      <div class="hud-rail-track">
+        <div class="hud-rail-fill" id="time-rail-fill"></div>
+        <div class="hud-rail-thumb" id="time-rail-thumb"></div>
+      </div>
+      <input class="hud-rail-range" id="slider-time-vertical" max="360" min="0" step="1" type="range" value="40"/>
+    </div>
+    <div class="hud-rail-val-pill" id="val-time-pill">LIVE</div>
+    <button class="hud-rail-pause-btn btn-pause-toggle" id="btn-rail-pause" title="Pause / Resume Simulation">
+      <span id="rail-pause-icon">⏸</span>
+    </button>
+  </div>
+
+  <!-- Bottom Area: Trigger Pill + Centered Transport + Bottom Flight Modes -->
+  <div class="hud-bottom-area">
+    <div class="hud-bottom-subrow">
+      <!-- Left AOCS Flight Controls trigger pill -->
+      <button class="hud-aocs-trigger-pill" id="btn-trigger-aocs-drawer">
+        <span class="aocs-trigger-icon">☼</span>
+        <div class="aocs-trigger-text">
+          <span class="aocs-trigger-title">AOCS</span>
+          <span class="aocs-trigger-sub">FLIGHT CONTROLS</span>
+        </div>
+        <span class="aocs-trigger-chevron">›</span>
+      </button>
+
+      <!-- Center Transport Cluster -->
+      <div class="hud-sim-transport">
+        <button class="hud-transport-step" id="btn-transport-step-back" title="Step Back 10s">‹</button>
+        <button class="hud-transport-pause btn-pause-toggle" id="btn-transport-pause">
+          <span id="hud-pause-icon">⏸</span>
+          <span id="hud-pause-label">PAUSE</span>
+        </button>
+        <button class="hud-transport-step" id="btn-transport-step-fwd" title="Step Forward 10s">›</button>
+      </div>
+    </div>
+
+    <!-- Bottom Row: 4 Primary AOCS Flight Modes -->
+    <div class="hud-flight-modes-bar">
+      <button class="hud-mode-card active" data-mode="DETUMBLE" id="mode-card-detumble">
+        <div class="mode-card-header">
+          <span class="mode-card-icon">◎</span>
+          <span class="mode-card-title">B-DOT DETUMBLE</span>
+        </div>
+        <span class="mode-card-sub">Magnetorquers • 1x 5</span>
+      </button>
+
+      <button class="hud-mode-card" data-mode="NADIR" id="mode-card-nadir">
+        <div class="mode-card-header">
+          <span class="mode-card-icon">⌖</span>
+          <span class="mode-card-title">NADIR POINTING</span>
+        </div>
+        <span class="mode-card-sub">Earth Obs • Virtual PD</span>
+      </button>
+
+      <button class="hud-mode-card" data-mode="SUN_TRACK" id="mode-card-sun">
+        <div class="mode-card-header">
+          <span class="mode-card-icon">☼</span>
+          <span class="mode-card-title">SUN TRACKING</span>
+        </div>
+        <span class="mode-card-sub">Kep. Solar Panel • 4x</span>
+      </button>
+
+      <button class="hud-mode-card" data-mode="GS_TRACK" id="mode-card-gs">
+        <div class="mode-card-header">
+          <span class="mode-card-icon">◢</span>
+          <span class="mode-card-title">AALBORG GS SLEW</span>
+        </div>
+        <span class="mode-card-sub">X+0.2°/s • Y-0.2°/s</span>
+      </button>
+    </div>
+  </div>
+
 </div>
 </div>
 <!-- Right Flight Computer Console -->
-<aside class="flight-sidebar mobile-drawer-pane"><div class="mobile-drawer-header" id="mobileDrawerHeader">
-<div class="drawer-title-group">
-<span style="font-size: 1.1rem;">🎛️</span>
-<span class="drawer-badge">AOCS FLIGHT CONTROLS</span>
+<!-- Telemetry Drawer Backdrop & Slide-Over Panel -->
+<div class="telemetry-backdrop" id="telemetry-backdrop"></div>
+<aside class="flight-sidebar telemetry-drawer" id="telemetry-drawer">
+<div class="telemetry-drawer-header">
+  <div class="drawer-header-brand">
+    <span style="font-size: 1.1rem;">🛰️</span>
+    <span class="drawer-title">AOCS MISSION TELEMETRY</span>
+  </div>
+  <button class="drawer-close-btn" id="btn-close-telemetry">✕ CLOSE</button>
 </div>
-<div class="drawer-toggle-btn" id="drawerToggleBtn">
-<span id="drawerToggleText">▲ OPEN CONTROLS</span>
-</div>
-</div><div class="mobile-drawer-body" id="mobileDrawerBody">
+<div class="telemetry-drawer-body" id="mobileDrawerBody">
 <!-- 1. Simulation Runtime & Time Warp Control -->
 <div class="panel-header collapsible-header" data-target="panel-warp">
   <div style="display: flex; align-items: center; gap: 6px;">

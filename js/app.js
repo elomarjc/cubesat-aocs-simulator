@@ -67,6 +67,7 @@ class CubeSatApp {
     this.scene.setViewMode('ORBITAL');
 
     this.setupUIBindings();
+    this.setupFloatingHUDBindings();
 
     // Start Main Simulation Loop
     requestAnimationFrame((t) => this.loop(t));
@@ -209,6 +210,256 @@ class CubeSatApp {
     }
   }
 
+
+  setupFloatingHUDBindings() {
+    this.isScrubbingTime = false;
+
+    // 1. Synchronized Speed Slider (Rail + Track drag + Input)
+    const speedInput = document.getElementById('slider-speed-vertical');
+    const speedContainer = document.getElementById('speed-rail-container');
+    const speedFill = document.getElementById('speed-rail-fill');
+    const speedThumb = document.getElementById('speed-rail-thumb');
+    const speedPill = document.getElementById('val-speed-pill');
+    const warpBadge = document.getElementById('hud-warp-pill-val');
+
+    const updateSpeedUI = (val) => {
+      this.timeWarp = Math.max(1, Math.min(30, Math.round(val)));
+      document.querySelectorAll('.slider-timewarp-input').forEach(s => { s.value = this.timeWarp; });
+      document.querySelectorAll('.val-timewarp-text').forEach(v => { v.textContent = `${this.timeWarp}x`; });
+      document.querySelectorAll('.val-timewarp-badge').forEach(b => { b.textContent = `${this.timeWarp}x`; });
+      if (warpBadge) warpBadge.textContent = `${this.timeWarp}x WARP`;
+      const pct = ((this.timeWarp - 1) / (30 - 1)) * 100;
+      if (speedFill) speedFill.style.height = `${pct}%`;
+      if (speedThumb) speedThumb.style.bottom = `${pct}%`;
+      const warpBtn = document.getElementById('btn-toggle-warp');
+      if (warpBtn) warpBtn.classList.toggle('active', this.timeWarp > 1);
+    };
+
+    speedInput?.addEventListener('input', (e) => updateSpeedUI(parseFloat(e.target.value)));
+
+    // Track dragging for speed
+    let draggingSpeed = false;
+    const handleSpeedPointer = (e) => {
+      const rect = speedContainer.getBoundingClientRect();
+      const frac = Math.max(0, Math.min(1, (rect.bottom - e.clientY) / rect.height));
+      updateSpeedUI(1 + frac * 29);
+    };
+    speedContainer?.addEventListener('pointerdown', (e) => {
+      draggingSpeed = true;
+      speedContainer.classList.add('active');
+      speedContainer.setPointerCapture?.(e.pointerId);
+      handleSpeedPointer(e);
+    });
+    speedContainer?.addEventListener('pointermove', (e) => {
+      if (draggingSpeed) handleSpeedPointer(e);
+    });
+    const stopSpeedDrag = (e) => {
+      if (draggingSpeed) {
+        draggingSpeed = false;
+        speedContainer.classList.remove('active');
+        try { speedContainer.releasePointerCapture?.(e.pointerId); } catch (_) {}
+      }
+    };
+    speedContainer?.addEventListener('pointerup', stopSpeedDrag);
+    speedContainer?.addEventListener('pointercancel', stopSpeedDrag);
+
+    // 2. Orbital Time Scrubber Slider
+    const timeInput = document.getElementById('slider-time-vertical');
+    const timeContainer = document.getElementById('time-rail-container');
+    const timeFill = document.getElementById('time-rail-fill');
+    const timeThumb = document.getElementById('time-rail-thumb');
+    const timePill = document.getElementById('val-time-pill');
+
+    const updateOrbitalScrub = (degVal) => {
+      const targetDeg = Math.max(0, Math.min(360, degVal));
+      if (timeInput) timeInput.value = targetDeg;
+      const pct = (targetDeg / 360) * 100;
+      if (timeFill) timeFill.style.height = `${pct}%`;
+      if (timeThumb) timeThumb.style.bottom = `${pct}%`;
+      if (timePill) timePill.textContent = `${Math.round(targetDeg)}°`;
+
+      const targetRad = targetDeg * (Math.PI / 180);
+      let dNu = (targetRad - this.orbit.trueAnomaly0) % (2 * Math.PI);
+      if (dNu < 0) dNu += 2 * Math.PI;
+      const completedOrbits = Math.floor(this.simTime / this.orbit.period);
+      this.simTime = completedOrbits * this.orbit.period + (dNu / this.orbit.meanMotion);
+
+      if (this.isPaused) {
+        const orbState = this.orbit.getState(this.simTime);
+        this.currentSat3DPos = this.earth.updateSatellitePosition(orbState.positionECI);
+        this.scene.render();
+      }
+    };
+
+    timeInput?.addEventListener('input', (e) => {
+      this.isScrubbingTime = true;
+      updateOrbitalScrub(parseFloat(e.target.value));
+    });
+    timeInput?.addEventListener('change', () => {
+      this.isScrubbingTime = false;
+    });
+
+    let draggingTime = false;
+    const handleTimePointer = (e) => {
+      const rect = timeContainer.getBoundingClientRect();
+      const frac = Math.max(0, Math.min(1, (rect.bottom - e.clientY) / rect.height));
+      updateOrbitalScrub(frac * 360);
+    };
+    timeContainer?.addEventListener('pointerdown', (e) => {
+      draggingTime = true;
+      this.isScrubbingTime = true;
+      timeContainer.classList.add('active');
+      timeContainer.setPointerCapture?.(e.pointerId);
+      handleTimePointer(e);
+    });
+    timeContainer?.addEventListener('pointermove', (e) => {
+      if (draggingTime) handleTimePointer(e);
+    });
+    const stopTimeDrag = (e) => {
+      if (draggingTime) {
+        draggingTime = false;
+        this.isScrubbingTime = false;
+        timeContainer.classList.remove('active');
+        try { timeContainer.releasePointerCapture?.(e.pointerId); } catch (_) {}
+      }
+    };
+    timeContainer?.addEventListener('pointerup', stopTimeDrag);
+    timeContainer?.addEventListener('pointercancel', stopTimeDrag);
+
+    // 3. Pause Button Handlers (Rail & Transport)
+    const updatePauseButtons = () => {
+      const pText = this.isPaused ? '▶ RESUME' : '⏸ PAUSE';
+      document.querySelectorAll('.btn-pause-toggle').forEach(b => {
+        if (b.id !== 'btn-rail-pause' && b.id !== 'btn-transport-pause') {
+          b.textContent = pText;
+        }
+      });
+      const railIcon = document.getElementById('rail-pause-icon');
+      if (railIcon) railIcon.textContent = this.isPaused ? '▶' : '⏸';
+
+      const hudIcon = document.getElementById('hud-pause-icon');
+      const hudLabel = document.getElementById('hud-pause-label');
+      const transportBtn = document.getElementById('btn-transport-pause');
+      if (hudIcon) hudIcon.textContent = this.isPaused ? '▶' : '⏸';
+      if (hudLabel) hudLabel.textContent = this.isPaused ? 'RESUME' : 'PAUSE';
+      if (transportBtn) transportBtn.classList.toggle('is-paused', this.isPaused);
+      if (timePill) {
+        timePill.classList.toggle('is-paused', this.isPaused);
+        timePill.classList.toggle('is-live', !this.isPaused);
+      }
+    };
+
+    document.getElementById('btn-rail-pause')?.addEventListener('click', () => {
+      this.isPaused = !this.isPaused;
+      updatePauseButtons();
+    });
+    document.getElementById('btn-transport-pause')?.addEventListener('click', () => {
+      this.isPaused = !this.isPaused;
+      updatePauseButtons();
+    });
+
+    // 4. Transport Step Buttons
+    document.getElementById('btn-transport-step-back')?.addEventListener('click', () => {
+      this.simTime = Math.max(0, this.simTime - 10);
+      const orbState = this.orbit.getState(this.simTime);
+      this.currentSat3DPos = this.earth.updateSatellitePosition(orbState.positionECI);
+      updateOrbitalScrub(orbState.trueAnomalyDeg);
+      this.scene.render();
+    });
+    document.getElementById('btn-transport-step-fwd')?.addEventListener('click', () => {
+      this.simTime += 10;
+      const orbState = this.orbit.getState(this.simTime);
+      this.currentSat3DPos = this.earth.updateSatellitePosition(orbState.positionECI);
+      updateOrbitalScrub(orbState.trueAnomalyDeg);
+      this.scene.render();
+    });
+
+    // 5. Top-Right Cluster Buttons
+    const modal = document.getElementById('help-modal');
+    document.getElementById('btn-hud-menu')?.addEventListener('click', () => {
+      modal?.classList.add('open');
+    });
+
+    const drawer = document.getElementById('telemetry-drawer');
+    const backdrop = document.getElementById('telemetry-backdrop');
+    const openDrawer = () => {
+      drawer?.classList.add('open');
+      backdrop?.classList.add('active');
+    };
+    const closeDrawer = () => {
+      drawer?.classList.remove('open');
+      backdrop?.classList.remove('active');
+    };
+
+    document.getElementById('btn-hud-settings')?.addEventListener('click', openDrawer);
+    document.getElementById('btn-trigger-aocs-drawer')?.addEventListener('click', openDrawer);
+    document.getElementById('btn-close-telemetry')?.addEventListener('click', closeDrawer);
+    backdrop?.addEventListener('click', closeDrawer);
+
+    // Fullscreen Toggle
+    document.getElementById('btn-hud-fullscreen')?.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(() => {});
+      } else {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    });
+
+    // 6. Select Dropdown Text Sync
+    const selView = document.getElementById('select-view');
+    const lblCam = document.getElementById('hud-cam-label');
+    selView?.addEventListener('change', () => {
+      if (lblCam) lblCam.textContent = selView.options[selView.selectedIndex].text;
+    });
+
+    const selOrbit = document.getElementById('select-orbit');
+    const lblOrbit = document.getElementById('hud-orbit-label');
+    selOrbit?.addEventListener('change', () => {
+      if (lblOrbit) lblOrbit.textContent = selOrbit.options[selOrbit.selectedIndex].text;
+    });
+
+    // 7. Flight Mode Buttons Sync across HUD & Sidebar
+    const allModeBtns = document.querySelectorAll('[data-mode]');
+    allModeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.getAttribute('data-mode');
+        this.setFlightMode(mode);
+        allModeBtns.forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-mode') === mode);
+        });
+      });
+    });
+  }
+
+  updateFloatingHUD(orbState) {
+    if (!orbState) return;
+
+    // Update orbital position rail if not scrubbing
+    if (!this.isScrubbingTime) {
+      const nuDeg = orbState.trueAnomalyDeg;
+      const pct = (nuDeg / 360) * 100;
+      const timeFill = document.getElementById('time-rail-fill');
+      const timeThumb = document.getElementById('time-rail-thumb');
+      const timeInput = document.getElementById('slider-time-vertical');
+      const timePill = document.getElementById('val-time-pill');
+
+      if (timeInput) timeInput.value = Math.round(nuDeg);
+      if (timeFill) timeFill.style.height = `${pct}%`;
+      if (timeThumb) timeThumb.style.bottom = `${pct}%`;
+      if (timePill) {
+        if (this.isPaused) {
+          timePill.textContent = `${Math.round(nuDeg)}°`;
+          timePill.classList.add('is-paused');
+          timePill.classList.remove('is-live');
+        } else {
+          timePill.textContent = 'LIVE';
+          timePill.classList.add('is-live');
+          timePill.classList.remove('is-paused');
+        }
+      }
+    }
+  }
+
   loop(timestamp) {
     requestAnimationFrame((t) => this.loop(t));
 
@@ -314,6 +565,8 @@ class CubeSatApp {
       cmdDipoleMTQ,
       cmdTorqueRW
     );
+
+    this.updateFloatingHUD(orbState);
 
     // Render Scene
     this.scene.render();

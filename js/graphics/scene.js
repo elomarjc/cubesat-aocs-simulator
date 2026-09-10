@@ -15,9 +15,9 @@ export class SpaceScene {
     // 2. Camera - Global Orbital default viewing Earth and orbiting CubeSat
     this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.05, 10000);
     const isMobileAspect = (this.width / this.height) < 1.0;
-    // On mobile portrait, set distance to 13.8 so Earth + Orbit fit completely without zooming out
-    const initDist = isMobileAspect ? 13.8 : 8.6;
-    const initY = isMobileAspect ? 4.5 : 3.2;
+    // On mobile portrait, set distance to 23.5 and Y to 3.8 so Earth + Orbit fit with comfortable margin
+    const initDist = isMobileAspect ? 23.5 : 8.6;
+    const initY = isMobileAspect ? 3.8 : 3.2;
     this.camera.position.set(0, initY, initDist);
 
     this.viewMode = 'ORBITAL';
