@@ -28,10 +28,10 @@
             <polyline points="2 17 12 22 22 17"></polyline>
             <polyline points="2 12 12 17 22 12"></polyline>
           </svg>
-          <span>GOMSPACE</span>
+          <span>3U CUBESAT AOCS</span>
         </div>
         <span class="brand-badge">AOCS FLIGHT SIMULATOR v2.4</span>
-        <span style="color: var(--text-dim); font-size: 11px;">3U NanoMind Architecture • AAU Heritage</span>
+        <span style="color: var(--text-dim); font-size: 11px;">3U Nanosatellite Architecture • Aalborg Space Heritage</span>
       </div>
 
       <div class="mission-badges">
@@ -40,6 +40,7 @@
       </div>
 
       <div class="header-actions">
+            <button id="guideBtn" class="btn-guide">📖 How to Use & Problem Solved</button>
         <button class="btn-action" id="btn-export-csv">📥 EXPORT CSV</button>
         <button class="btn-action" id="btn-export-json">📄 EXPORT JSON</button>
         <button class="btn-action" id="btn-help">❓ HELP & SPECS</button>
@@ -278,7 +279,7 @@
       <div class="strip-metrics">
         <div style="font-weight: 700; color: var(--accent-cyan);">MISSION TELEMETRY STRIP</div>
         <div style="color: var(--text-dim); font-size: 11px;">Sampling rate: 20 Hz (RK4 Integrator)</div>
-        <div style="color: var(--text-dim); font-size: 11px;">GomSpace CSP / CAN Bus Format</div>
+        <div style="color: var(--text-dim); font-size: 11px;">CubeSat Space Protocol (CSP) / CAN Bus Telemetry</div>
       </div>
 
       <div class="strip-canvas-box">
@@ -329,5 +330,91 @@
 
   <!-- Application Script -->
   <script type="module" src="js/app.js?v=2.7"></script>
+
+    <!-- Interactive Guide & Problem Overview Modal -->
+    <div id="guideModal" class="guide-modal-overlay">
+        <div class="guide-modal-card">
+            <div class="guide-modal-header">
+                <h2>🛰️ CubeSat AOCS Flight Simulator</h2>
+                <button id="guideClose" class="guide-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="guide-modal-body">
+                <div class="guide-section">
+                    <h3>🎯 The Industrial Problem Solved</h3>
+                    <p>When a 3U nanosatellite deploys from a rocket canister in Low Earth Orbit (LEO), spring ejection imparts severe tip-off angular tumble rates (up to 40°/s). If not rapidly detumbled, the satellite cannot orient its solar panels to recharge batteries, causing mission loss. Furthermore, precise attitude control is required to point directional patch antennas at ground stations during brief 8-minute orbital passes.</p>
+                </div>
+
+                <div class="guide-section">
+                    <h3>💡 How This Digital Twin Solves It</h3>
+                    <p>Solves 10-state coupled differential equations using a 4th-order Runge-Kutta (RK4) integrator, modeling quaternion kinematics, gravity-gradient torques, aerodynamic drag, magnetic B-dot detumbling (m = -k B_dot), 3-axis reaction wheel dynamics (up to 6,500 RPM), and automated ground station slewing.</p>
+                </div>
+
+                <div class="guide-section">
+                    <h3>🕹️ Interactive Quickstart Tutorial (Try This Now!)</h3>
+                    <ul class="guide-step-list">
+                    <li class="guide-step-item">
+                        <span class="guide-step-num">1</span>
+                        <div class="guide-step-content">
+                            <strong>Tumble the Satellite:</strong> Click the red '⚡ TUMBLE SATELLITE' button to simulate violent post-deployment tip-off rotation (&gt;25°/s).
+                        </div>
+                    </li>
+                    <li class="guide-step-item">
+                        <span class="guide-step-num">2</span>
+                        <div class="guide-step-content">
+                            <strong>Engage B-Dot Detumbling:</strong> Click 'B-DOT DETUMBLE' to fire 3-axis magnetic torque coils against Earth's magnetic field and watch angular velocity damp down to &lt;0.5°/s on the telemetry strip chart.
+                        </div>
+                    </li>
+                    <li class="guide-step-item">
+                        <span class="guide-step-num">3</span>
+                        <div class="guide-step-content">
+                            <strong>Track Ground Station:</strong> Click 'AALBORG GS SLEW' to engage internal reaction wheels, slewing the satellite antenna directly toward the ground station to establish an active communication link.
+                        </div>
+                    </li>
+                    </ul>
+                </div>
+
+                <div class="guide-section">
+                    <h3>📊 Telemetry & Control Glossary</h3>
+                    <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem;">
+                        <li><strong>B-dot Detumbling:</strong> Magnetic damping law (m = -k B_dot) that energizes magnetorquer coils proportional to the time rate of change of Earth's magnetic field to halt satellite rotation without propellant.</li><li><strong>Reaction Wheels:</strong> High-speed flywheels that exchange angular momentum with the spacecraft body to execute high-precision pointing maneuvers.</li><li><strong>LVLH Frame:</strong> Local Vertical Local Horizontal orbital reference frame where +Z points toward Earth center (Nadir) and +X points along the velocity vector.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="guide-modal-footer">
+                <button id="guideStart" class="btn-guide-start">🚀 Start Interactive Simulator</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Toggle Script -->
+    <script>
+        (function() {
+            const guideBtn = document.getElementById('guideBtn');
+            const guideModal = document.getElementById('guideModal');
+            const guideClose = document.getElementById('guideClose');
+            const guideStart = document.getElementById('guideStart');
+
+            function openModal() { if (guideModal) guideModal.classList.add('active'); }
+            function closeModal() { if (guideModal) guideModal.classList.remove('active'); }
+
+            if (guideBtn) guideBtn.addEventListener('click', openModal);
+            if (guideClose) guideClose.addEventListener('click', closeModal);
+            if (guideStart) guideStart.addEventListener('click', closeModal);
+            if (window.location.search.indexOf('guide') !== -1) openModal();
+
+            if (guideModal) {
+                guideModal.addEventListener('click', function(e) {
+                    if (e.target === guideModal) closeModal();
+                });
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && guideModal && guideModal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+        })();
+    </script>
+
 </body>
 </html>

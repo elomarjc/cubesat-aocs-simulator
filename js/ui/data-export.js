@@ -1,5 +1,5 @@
 /**
- * GomSpace CSP / CAN Bus Packet Telemetry Logger & Exporter
+ * CubeSat Space Protocol (CSP) / CAN Bus Packet Telemetry Logger & Exporter
  * Formats telemetry into CSV and structured JSON datasets for mission verification.
  */
 
