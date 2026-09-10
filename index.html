@@ -6,7 +6,7 @@
   <title>CubeSat AOCS Flight Simulator | 3D Interactive LEO Orbit & Attitude Control</title>
   <meta name="description" content="Interactive 3D Attitude Determination & Control System (AOCS) flight simulator for Low Earth Orbit nanosatellites. Implements B-dot detumbling, reaction wheel nadir pointing, Sun tracking, and Aalborg ground station slew.">
   
-  <link rel="stylesheet" href="css/aocs.css?v=3.0">
+  <link rel="stylesheet" href="css/aocs.css?v=4.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -40,7 +40,7 @@
       </div>
 
       <div class="header-actions">
-            <button id="guideBtn" class="btn-guide">📖 How to Use & Problem Solved</button>
+            <button id="guideBtn" class="btn-guide">🎮 Guided Tour</button>
         <button class="btn-action" id="btn-export-csv">📥 EXPORT CSV</button>
         <button class="btn-action" id="btn-export-json">📄 EXPORT JSON</button>
         <button class="btn-action" id="btn-help">❓ HELP & SPECS</button>
@@ -331,121 +331,655 @@
   <!-- Application Script -->
   <script type="module" src="js/app.js?v=2.7"></script>
 
-    <!-- Interactive Guide & Problem Overview Modal -->
-    <div id="guideModal" class="guide-modal-overlay">
-        <div class="guide-modal-card">
-            <div class="guide-modal-header">
-                <h2>🛰️ CubeSat AOCS Flight Simulator</h2>
-                <button id="guideClose" class="guide-modal-close" aria-label="Close modal">&times;</button>
-            </div>
-            <div class="guide-modal-body">
-                <div class="guide-section">
-                    <h3>🎯 The Industrial Problem Solved</h3>
-                    <p>When a 3U nanosatellite deploys from a rocket canister in Low Earth Orbit (LEO), spring ejection imparts severe tip-off angular tumble rates (up to 40°/s). If not rapidly detumbled, the satellite cannot orient its solar panels to recharge batteries, causing mission loss. Furthermore, precise attitude control is required to point directional patch antennas at ground stations during brief 8-minute orbital passes.</p>
-                </div>
-
-                <div class="guide-section">
-                    <h3>💡 How This Digital Twin Solves It</h3>
-                    <p>Solves 10-state coupled differential equations using a 4th-order Runge-Kutta (RK4) integrator, modeling quaternion kinematics, gravity-gradient torques, aerodynamic drag, magnetic B-dot detumbling (m = -k B_dot), 3-axis reaction wheel dynamics (up to 6,500 RPM), and automated ground station slewing.</p>
-                </div>
-
-                <div class="guide-section">
-                    <h3>🕹️ Interactive Quickstart Tutorial (Try This Now!)</h3>
-                    <ul class="guide-step-list">
-                    <li class="guide-step-item">
-                        <span class="guide-step-num">1</span>
-                        <div class="guide-step-content">
-                            <strong>Tumble the Satellite:</strong> Click the red '⚡ TUMBLE SATELLITE' button to simulate violent post-deployment tip-off rotation (&gt;25°/s).
-                        </div>
-                    </li>
-                    <li class="guide-step-item">
-                        <span class="guide-step-num">2</span>
-                        <div class="guide-step-content">
-                            <strong>Engage B-Dot Detumbling:</strong> Click 'B-DOT DETUMBLE' to fire 3-axis magnetic torque coils against Earth's magnetic field and watch angular velocity damp down to &lt;0.5°/s on the telemetry strip chart.
-                        </div>
-                    </li>
-                    <li class="guide-step-item">
-                        <span class="guide-step-num">3</span>
-                        <div class="guide-step-content">
-                            <strong>Track Ground Station:</strong> Click 'AALBORG GS SLEW' to engage internal reaction wheels, slewing the satellite antenna directly toward the ground station to establish an active communication link.
-                        </div>
-                    </li>
-                    </ul>
-                </div>
-
-                <div class="guide-section">
-                    <h3>📊 Telemetry & Control Glossary</h3>
-                    <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem;">
-                        <li><strong>B-dot Detumbling:</strong> Magnetic damping law (m = -k B_dot) that energizes magnetorquer coils proportional to the time rate of change of Earth's magnetic field to halt satellite rotation without propellant.</li><li><strong>Reaction Wheels:</strong> High-speed flywheels that exchange angular momentum with the spacecraft body to execute high-precision pointing maneuvers.</li><li><strong>LVLH Frame:</strong> Local Vertical Local Horizontal orbital reference frame where +Z points toward Earth center (Nadir) and +X points along the velocity vector.</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="guide-modal-footer">
+    <div class="guide-modal-footer">
                 <button id="guideStart" class="btn-guide-start">🚀 Start Interactive Simulator</button>
             </div>
         </div>
     </div>
 
-    <!-- Floating Quick Guide Pill (Always visible & 1-tap accessible on mobile & desktop) -->
-    <button id="guideBtnFloating" class="btn-guide-floating" aria-label="Open Guide">💡 Tutorial & Problem Solved</button>
+    
 
-    <!-- Modal Toggle & Auto-Open Script -->
+
+
+    
+
+
+    
+
     <script>
-        (function() {
-            const guideBtn = document.getElementById('guideBtn');
-            const guideBtnFloating = document.getElementById('guideBtnFloating');
-            const guideModal = document.getElementById('guideModal');
-            const guideClose = document.getElementById('guideClose');
-            const guideStart = document.getElementById('guideStart');
+    (function() {
+        const steps = [
+    {
+        "target": "#btn-tumble",
+        "title": "\ud83d\udc49 Step 1: Click '\u26a1 TUMBLE SATELLITE'",
+        "why": "Simulates violent angular tumble (>25\u00b0/s) after spring ejection from a rocket deployer. The satellite cannot charge batteries until stabilized."
+    },
+    {
+        "target": "button[data-mode='DETUMBLE']",
+        "title": "\ud83d\udc49 Step 2: Click 'B-DOT DETUMBLE'",
+        "why": "Energizes 3-axis magnetic torque coils against Earth's geomagnetic field (m = -k \u1e02), damping tumble rates below 0.5\u00b0/s without consuming propellant."
+    },
+    {
+        "target": "button[data-mode='GS_TRACK']",
+        "title": "\ud83d\udc49 Step 3: Click 'AALBORG GS SLEW'",
+        "why": "Spins internal reaction wheels to steer directional patch antennas toward the ground station for high-throughput orbital pass telemetry."
+    },
+    {
+        "target": "#chart-canvas",
+        "title": "\ud83d\udc49 Step 4: Observe Real-Time Telemetry",
+        "why": "Shows live quaternion states, wheel RPMs (up to 6,500 RPM), and Euler angles calculated by the 4th-order Runge-Kutta (RK4) physics engine."
+    }
+];
+        const tourKey = 'tour_done_cubesat-aocs-simulator';
+        let currentStep = 0;
+        let highlightedEl = null;
 
-            function openModal() {
-                if (guideModal) {
-                    guideModal.classList.add('active');
-                    guideModal.style.opacity = '1';
-                    guideModal.style.pointerEvents = 'auto';
-                }
+        const backdrop = document.getElementById('tourBackdrop');
+        const card = document.getElementById('tourCard');
+        const badge = document.getElementById('tourStepBadge');
+        const title = document.getElementById('tourTitle');
+        const why = document.getElementById('tourWhy');
+        const dotsContainer = document.getElementById('tourDots');
+        const prevBtn = document.getElementById('tourBtnPrev');
+        const nextBtn = document.getElementById('tourBtnNext');
+        const skipBtn = document.getElementById('tourBtnSkip');
+        const launcherBtn = document.getElementById('btnTourLauncher');
+        const guideBtn = document.getElementById('guideBtn');
+
+        if (!backdrop || !card) return;
+
+        // Build step dots
+        dotsContainer.innerHTML = '';
+        steps.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'tour-dot' + (i === 0 ? ' active' : '');
+            dotsContainer.appendChild(dot);
+        });
+
+        function positionCard(targetEl) {
+            if (window.innerWidth <= 640) {
+                card.style.top = 'auto';
+                card.style.bottom = '12px';
+                card.style.left = '10px';
+                card.style.right = '10px';
+                card.style.transform = 'none';
+                return;
             }
 
-            function closeModal() {
-                if (guideModal) {
-                    guideModal.classList.remove('active');
-                    guideModal.style.opacity = '0';
-                    guideModal.style.pointerEvents = 'none';
-                }
-                try {
-                    sessionStorage.setItem('guide_dismissed_' + window.location.pathname, '1');
-                } catch(e) {}
+            const rect = targetEl.getBoundingClientRect();
+            const cardW = 420;
+            let top = rect.bottom + 14;
+            let left = rect.left;
+
+            if (top + 210 > window.innerHeight && rect.top > 220) {
+                top = rect.top - 190;
+            }
+            if (left + cardW > window.innerWidth) {
+                left = window.innerWidth - cardW - 20;
+            }
+            if (left < 20) left = 20;
+
+            card.style.top = Math.max(20, top) + 'px';
+            card.style.left = left + 'px';
+            card.style.bottom = 'auto';
+            card.style.right = 'auto';
+            card.style.transform = 'none';
+        }
+
+        function showStep(index) {
+            if (index < 0 || index >= steps.length) return;
+            currentStep = index;
+
+            if (highlightedEl) {
+                highlightedEl.classList.remove('tour-spotlight-active');
             }
 
-            if (guideBtn) guideBtn.addEventListener('click', openModal);
-            if (guideBtnFloating) guideBtnFloating.addEventListener('click', openModal);
-            if (guideClose) guideClose.addEventListener('click', closeModal);
-            if (guideStart) guideStart.addEventListener('click', closeModal);
-
-            if (guideModal) {
-                guideModal.addEventListener('click', function(e) {
-                    if (e.target === guideModal) closeModal();
-                });
-            }
-
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && guideModal && guideModal.classList.contains('active')) {
-                    closeModal();
-                }
-            });
-
-            // Auto-open on initial visit for immediate problem & tutorial clarity on both mobile and desktop
+            const step = steps[index];
+            let targetEl = null;
             try {
-                const dismissed = sessionStorage.getItem('guide_dismissed_' + window.location.pathname);
-                const forceOpen = window.location.search.indexOf('guide') !== -1;
-                if (!dismissed || forceOpen) {
-                    setTimeout(openModal, 120);
-                }
-            } catch(e) {
-                setTimeout(openModal, 120);
+                targetEl = document.querySelector(step.target);
+            } catch(e) {}
+
+            badge.textContent = `Step ${index + 1} of ${steps.length}`;
+            title.textContent = step.title;
+            why.innerHTML = `<strong>Why:</strong> ${step.why}`;
+
+            // Update dot indicators
+            const dots = dotsContainer.querySelectorAll('.tour-dot');
+            dots.forEach((d, i) => d.classList.toggle('active', i === index));
+
+            // Button label updates
+            prevBtn.style.visibility = index === 0 ? 'hidden' : 'visible';
+            nextBtn.textContent = index === steps.length - 1 ? 'Finish 🚀' : 'Next ➔';
+
+            if (targetEl) {
+                highlightedEl = targetEl;
+                targetEl.classList.add('tour-spotlight-active');
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                setTimeout(() => positionCard(targetEl), 140);
+            } else {
+                card.style.top = '50%';
+                card.style.left = '50%';
+                card.style.transform = 'translate(-50%, -50%)';
             }
-        })();
+
+            backdrop.classList.add('active');
+            card.classList.add('active');
+        }
+
+        function endTour() {
+            if (highlightedEl) {
+                highlightedEl.classList.remove('tour-spotlight-active');
+                highlightedEl = null;
+            }
+            backdrop.classList.remove('active');
+            card.classList.remove('active');
+            try {
+                sessionStorage.setItem(tourKey, '1');
+            } catch(e) {}
+        }
+
+        function startTour() {
+            showStep(0);
+        }
+
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentStep < steps.length - 1) {
+                showStep(currentStep + 1);
+            } else {
+                endTour();
+            }
+        });
+
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentStep > 0) showStep(currentStep - 1);
+        });
+
+        skipBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            endTour();
+        });
+
+        backdrop.addEventListener('click', endTour);
+
+        if (launcherBtn) {
+            launcherBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                startTour();
+            });
+        }
+
+        if (guideBtn) {
+            guideBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                startTour();
+            });
+        }
+
+        // Auto-launch guided spotlight tour on first visit
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                try {
+                    const completed = sessionStorage.getItem(tourKey);
+                    if (!completed) {
+                        startTour();
+                    }
+                } catch(e) {
+                    startTour();
+                }
+            }, 450);
+        });
+
+        // URL parameter override: ?tour=1
+        if (window.location.search.indexOf('tour') !== -1) {
+            setTimeout(startTour, 300);
+        }
+    })();
     </script>
 
+
+    
+
+    <script>
+    (function() {
+        const steps = [
+    {
+        "target": "#btn-tumble",
+        "title": "\ud83d\udc49 Step 1: Click '\u26a1 TUMBLE SATELLITE'",
+        "why": "Simulates violent angular tumble (>25\u00b0/s) after spring ejection from a rocket deployer. The satellite cannot charge batteries until stabilized."
+    },
+    {
+        "target": "button[data-mode='DETUMBLE']",
+        "title": "\ud83d\udc49 Step 2: Click 'B-DOT DETUMBLE'",
+        "why": "Energizes 3-axis magnetic torque coils against Earth's geomagnetic field (m = -k \u1e02), damping tumble rates below 0.5\u00b0/s without consuming propellant."
+    },
+    {
+        "target": "button[data-mode='GS_TRACK']",
+        "title": "\ud83d\udc49 Step 3: Click 'AALBORG GS SLEW'",
+        "why": "Spins internal reaction wheels to steer directional patch antennas toward the ground station for high-throughput orbital pass telemetry."
+    },
+    {
+        "target": "#chart-canvas",
+        "title": "\ud83d\udc49 Step 4: Observe Real-Time Telemetry",
+        "why": "Shows live quaternion states, wheel RPMs (up to 6,500 RPM), and Euler angles calculated by the 4th-order Runge-Kutta (RK4) physics engine."
+    }
+];
+        const tourKey = 'tour_done_cubesat-aocs-simulator';
+        let currentStep = 0;
+        let highlightedEl = null;
+
+        const backdrop = document.getElementById('tourBackdrop');
+        const card = document.getElementById('tourCard');
+        const badge = document.getElementById('tourStepBadge');
+        const title = document.getElementById('tourTitle');
+        const why = document.getElementById('tourWhy');
+        const dotsContainer = document.getElementById('tourDots');
+        const prevBtn = document.getElementById('tourBtnPrev');
+        const nextBtn = document.getElementById('tourBtnNext');
+        const skipBtn = document.getElementById('tourBtnSkip');
+        const launcherBtn = document.getElementById('btnTourLauncher');
+        const guideBtn = document.getElementById('guideBtn');
+
+        if (!backdrop || !card) return;
+
+        // Build step dots
+        dotsContainer.innerHTML = '';
+        steps.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'tour-dot' + (i === 0 ? ' active' : '');
+            dotsContainer.appendChild(dot);
+        });
+
+        function positionCard(targetEl) {
+            if (window.innerWidth <= 640) {
+                if (targetEl) {
+                    const rect = targetEl.getBoundingClientRect();
+                    // If target is in lower half of screen, dock card at top so control is unobstructed!
+                    if (rect.top > window.innerHeight * 0.44) {
+                        card.style.top = '12px';
+                        card.style.bottom = 'auto';
+                    } else {
+                        card.style.top = 'auto';
+                        card.style.bottom = '12px';
+                    }
+                } else {
+                    card.style.top = 'auto';
+                    card.style.bottom = '12px';
+                }
+                card.style.left = '10px';
+                card.style.right = '10px';
+                card.style.transform = 'none';
+                return;
+            }
+
+            if (!targetEl) {
+                card.style.top = '50%';
+                card.style.left = '50%';
+                card.style.transform = 'translate(-50%, -50%)';
+                return;
+            }
+
+            const rect = targetEl.getBoundingClientRect();
+            const cardW = 420;
+            let top = rect.bottom + 14;
+            let left = rect.left;
+
+            if (top + 210 > window.innerHeight && rect.top > 220) {
+                top = rect.top - 190;
+            }
+            if (left + cardW > window.innerWidth) {
+                left = window.innerWidth - cardW - 20;
+            }
+            if (left < 20) left = 20;
+
+            card.style.top = Math.max(20, top) + 'px';
+            card.style.left = left + 'px';
+            card.style.bottom = 'auto';
+            card.style.right = 'auto';
+            card.style.transform = 'none';
+        }
+
+        function showStep(index) {
+            if (index < 0 || index >= steps.length) return;
+            currentStep = index;
+
+            if (highlightedEl) {
+                highlightedEl.classList.remove('tour-spotlight-active');
+            }
+
+            const step = steps[index];
+            let targetEl = null;
+            try {
+                targetEl = document.querySelector(step.target);
+            } catch(e) {}
+
+            badge.textContent = `Step ${index + 1} of ${steps.length}`;
+            title.textContent = step.title;
+            why.innerHTML = `<strong>Why:</strong> ${step.why}`;
+
+            // Update dot indicators
+            const dots = dotsContainer.querySelectorAll('.tour-dot');
+            dots.forEach((d, i) => d.classList.toggle('active', i === index));
+
+            // Button label updates
+            prevBtn.style.visibility = index === 0 ? 'hidden' : 'visible';
+            nextBtn.textContent = index === steps.length - 1 ? 'Finish 🚀' : 'Next ➔';
+
+            if (targetEl) {
+                highlightedEl = targetEl;
+                targetEl.classList.add('tour-spotlight-active');
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                setTimeout(() => positionCard(targetEl), 150);
+            } else {
+                positionCard(null);
+            }
+
+            backdrop.classList.add('active');
+            card.classList.add('active');
+        }
+
+        function endTour() {
+            if (highlightedEl) {
+                highlightedEl.classList.remove('tour-spotlight-active');
+                highlightedEl = null;
+            }
+            backdrop.classList.remove('active');
+            card.classList.remove('active');
+            try {
+                sessionStorage.setItem(tourKey, '1');
+            } catch(e) {}
+        }
+
+        function startTour() {
+            showStep(0);
+        }
+
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentStep < steps.length - 1) {
+                showStep(currentStep + 1);
+            } else {
+                endTour();
+            }
+        });
+
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentStep > 0) showStep(currentStep - 1);
+        });
+
+        skipBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            endTour();
+        });
+
+        backdrop.addEventListener('click', endTour);
+
+        if (launcherBtn) {
+            launcherBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                startTour();
+            });
+        }
+
+        if (guideBtn) {
+            guideBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                startTour();
+            });
+        }
+
+        // Auto-launch guided spotlight tour on first visit
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                try {
+                    const completed = sessionStorage.getItem(tourKey);
+                    if (!completed) {
+                        startTour();
+                    }
+                } catch(e) {
+                    startTour();
+                }
+            }, 450);
+        });
+
+        // URL parameter override: ?tour=1
+        if (window.location.search.indexOf('tour') !== -1) {
+            setTimeout(startTour, 300);
+        }
+    })();
+    </script>
+<!-- Interactive Guided Spotlight Tour Engine -->
+    <div class="tour-backdrop" id="tourBackdrop"></div>
+    <div class="tour-card" id="tourCard">
+        <div class="tour-badge-row">
+            <span class="tour-step-badge" id="tourStepBadge">Step 1 of 4</span>
+            <button class="tour-btn-skip" id="tourBtnSkip">✕ Skip Tour</button>
+        </div>
+        <h4 class="tour-action-title" id="tourTitle">Action Title</h4>
+        <div class="tour-why-box" id="tourWhy"><strong>Why:</strong> Reason</div>
+        <div class="tour-footer">
+            <div class="tour-dots" id="tourDots"></div>
+            <div class="tour-controls">
+                <button class="btn-tour-nav btn-tour-prev" id="tourBtnPrev">⇦ Back</button>
+                <button class="btn-tour-nav btn-tour-next" id="tourBtnNext">Next ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Tour Launcher Pill -->
+    <button class="btn-tour-launcher" id="btnTourLauncher">🎮 Guided Tour</button>
+
+    <script>
+    (function() {
+        const steps = [
+    {
+        "target": "#btn-tumble",
+        "title": "\ud83d\udc49 Step 1: Click '\u26a1 TUMBLE SATELLITE'",
+        "why": "Simulates violent angular tumble (>25\u00b0/s) after spring ejection from a rocket deployer. The satellite cannot charge batteries until stabilized."
+    },
+    {
+        "target": "button[data-mode='DETUMBLE']",
+        "title": "\ud83d\udc49 Step 2: Click 'B-DOT DETUMBLE'",
+        "why": "Energizes 3-axis magnetic torque coils against Earth's geomagnetic field (m = -k \u1e02), damping tumble rates below 0.5\u00b0/s without consuming propellant."
+    },
+    {
+        "target": "button[data-mode='GS_TRACK']",
+        "title": "\ud83d\udc49 Step 3: Click 'AALBORG GS SLEW'",
+        "why": "Spins internal reaction wheels to steer directional patch antennas toward the ground station for high-throughput orbital pass telemetry."
+    },
+    {
+        "target": "#chart-canvas",
+        "title": "\ud83d\udc49 Step 4: Observe Real-Time Telemetry",
+        "why": "Shows live quaternion states, wheel RPMs (up to 6,500 RPM), and Euler angles calculated by the 4th-order Runge-Kutta (RK4) physics engine."
+    }
+];
+        const tourKey = 'tour_done_cubesat-aocs-simulator';
+        let currentStep = 0;
+        let highlightedEl = null;
+
+        const backdrop = document.getElementById('tourBackdrop');
+        const card = document.getElementById('tourCard');
+        const badge = document.getElementById('tourStepBadge');
+        const title = document.getElementById('tourTitle');
+        const why = document.getElementById('tourWhy');
+        const dotsContainer = document.getElementById('tourDots');
+        const prevBtn = document.getElementById('tourBtnPrev');
+        const nextBtn = document.getElementById('tourBtnNext');
+        const skipBtn = document.getElementById('tourBtnSkip');
+        const launcherBtn = document.getElementById('btnTourLauncher');
+        const guideBtn = document.getElementById('guideBtn');
+
+        if (!backdrop || !card) return;
+
+        // Build step dots
+        dotsContainer.innerHTML = '';
+        steps.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'tour-dot' + (i === 0 ? ' active' : '');
+            dotsContainer.appendChild(dot);
+        });
+
+        function positionCard(targetEl) {
+            if (window.innerWidth <= 640) {
+                if (targetEl) {
+                    const rect = targetEl.getBoundingClientRect();
+                    // If target is in lower half of screen, dock card at top so control is unobstructed!
+                    if (rect.top > window.innerHeight * 0.44) {
+                        card.style.top = '12px';
+                        card.style.bottom = 'auto';
+                    } else {
+                        card.style.top = 'auto';
+                        card.style.bottom = '12px';
+                    }
+                } else {
+                    card.style.top = 'auto';
+                    card.style.bottom = '12px';
+                }
+                card.style.left = '10px';
+                card.style.right = '10px';
+                card.style.transform = 'none';
+                return;
+            }
+
+            if (!targetEl) {
+                card.style.top = '50%';
+                card.style.left = '50%';
+                card.style.transform = 'translate(-50%, -50%)';
+                return;
+            }
+
+            const rect = targetEl.getBoundingClientRect();
+            const cardW = 420;
+            let top = rect.bottom + 14;
+            let left = rect.left;
+
+            if (top + 210 > window.innerHeight && rect.top > 220) {
+                top = rect.top - 190;
+            }
+            if (left + cardW > window.innerWidth) {
+                left = window.innerWidth - cardW - 20;
+            }
+            if (left < 20) left = 20;
+
+            card.style.top = Math.max(20, top) + 'px';
+            card.style.left = left + 'px';
+            card.style.bottom = 'auto';
+            card.style.right = 'auto';
+            card.style.transform = 'none';
+        }
+
+        function showStep(index) {
+            if (index < 0 || index >= steps.length) return;
+            currentStep = index;
+
+            if (highlightedEl) {
+                highlightedEl.classList.remove('tour-spotlight-active');
+            }
+
+            const step = steps[index];
+            let targetEl = null;
+            try {
+                targetEl = document.querySelector(step.target);
+            } catch(e) {}
+
+            badge.textContent = `Step ${index + 1} of ${steps.length}`;
+            title.textContent = step.title;
+            why.innerHTML = `<strong>Why:</strong> ${step.why}`;
+
+            // Update dot indicators
+            const dots = dotsContainer.querySelectorAll('.tour-dot');
+            dots.forEach((d, i) => d.classList.toggle('active', i === index));
+
+            // Button label updates
+            prevBtn.style.visibility = index === 0 ? 'hidden' : 'visible';
+            nextBtn.textContent = index === steps.length - 1 ? 'Finish 🚀' : 'Next ➔';
+
+            if (targetEl) {
+                highlightedEl = targetEl;
+                targetEl.classList.add('tour-spotlight-active');
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                setTimeout(() => positionCard(targetEl), 150);
+            } else {
+                positionCard(null);
+            }
+
+            backdrop.classList.add('active');
+            card.classList.add('active');
+        }
+
+        function endTour() {
+            if (highlightedEl) {
+                highlightedEl.classList.remove('tour-spotlight-active');
+                highlightedEl = null;
+            }
+            backdrop.classList.remove('active');
+            card.classList.remove('active');
+            try {
+                sessionStorage.setItem(tourKey, '1');
+            } catch(e) {}
+        }
+
+        function startTour() {
+            showStep(0);
+        }
+
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentStep < steps.length - 1) {
+                showStep(currentStep + 1);
+            } else {
+                endTour();
+            }
+        });
+
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentStep > 0) showStep(currentStep - 1);
+        });
+
+        skipBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            endTour();
+        });
+
+        backdrop.addEventListener('click', endTour);
+
+        if (launcherBtn) {
+            launcherBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                startTour();
+            });
+        }
+
+        if (guideBtn) {
+            guideBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                startTour();
+            });
+        }
+
+        // Auto-launch guided spotlight tour on first visit
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                try {
+                    const completed = sessionStorage.getItem(tourKey);
+                    if (!completed) {
+                        startTour();
+                    }
+                } catch(e) {
+                    startTour();
+                }
+            }, 450);
+        });
+
+        // URL parameter override: ?tour=1
+        if (window.location.search.indexOf('tour') !== -1) {
+            setTimeout(startTour, 300);
+        }
+    })();
+    </script>
 </body>
 </html>
