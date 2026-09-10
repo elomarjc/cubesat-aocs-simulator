@@ -29,11 +29,13 @@ export class CubeSatModel {
     this.chassisWire = new THREE.LineSegments(edges, railMat);
     this.group.add(this.chassisWire);
 
-    // Multi-Layer Insulation (MLI) gold reflective foil facets
+    // Multi-Layer Insulation (MLI) gold reflective foil facets with radiant space glow
     const mliMat = new THREE.MeshStandardMaterial({
-      color: 0xd4af37,
-      metalness: 0.85,
-      roughness: 0.25
+      color: 0xffd700,
+      emissive: 0xffa000,
+      emissiveIntensity: 0.35,
+      metalness: 0.9,
+      roughness: 0.2
     });
     const mliMesh = new THREE.Mesh(new THREE.BoxGeometry(w * 0.96, h * 0.96, d * 0.96), mliMat);
     this.group.add(mliMesh);
@@ -226,9 +228,12 @@ export class CubeSatModel {
     }
 
     if (viewMode === 'ORBITAL') {
-      // Sleek proportionate scale (NEVER touches or clips Earth globe!)
-      this.group.scale.setScalar(0.75);
-      if (this.beaconSprite) this.beaconSprite.visible = true;
+      // Highly visible aerospace scale (1.8x) so satellite is clearly seen in orbit
+      this.group.scale.setScalar(1.8);
+      if (this.beaconSprite) {
+        this.beaconSprite.visible = true;
+        this.beaconSprite.scale.set(0.9, 0.9, 1.0);
+      }
       if (this.hudReticle) this.hudReticle.visible = true;
     } else {
       // Full 1:1 true scale in close-up chaser camera

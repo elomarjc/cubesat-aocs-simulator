@@ -14,7 +14,11 @@ export class SpaceScene {
 
     // 2. Camera - Global Orbital default viewing Earth and orbiting CubeSat
     this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.05, 10000);
-    this.camera.position.set(0, 3.2, 8.6); // Panoramic orbital view
+    const isMobileAspect = (this.width / this.height) < 1.0;
+    // On mobile portrait, set distance to 13.8 so Earth + Orbit fit completely without zooming out
+    const initDist = isMobileAspect ? 13.8 : 8.6;
+    const initY = isMobileAspect ? 4.5 : 3.2;
+    this.camera.position.set(0, initY, initDist);
 
     this.viewMode = 'ORBITAL';
     this.lastSatPos = new THREE.Vector3(0, 0, 0);
@@ -51,13 +55,17 @@ export class SpaceScene {
   }
 
   setupSunAndLighting() {
-    // Ambient starlight / Earthshine
-    this.ambientLight = new THREE.AmbientLight(0x101b33, 0.9);
+    // Ambient starlight / Earthshine - boosted for crisp visibility everywhere
+    this.ambientLight = new THREE.AmbientLight(0x354d72, 2.2);
     this.scene.add(this.ambientLight);
 
     // Primary Sun directional light
-    this.sunLight = new THREE.DirectionalLight(0xfffaed, 2.8);
+    this.sunLight = new THREE.DirectionalLight(0xfffaed, 3.2);
     this.scene.add(this.sunLight);
+
+    // Satellite tracking beacon light (illuminates satellite even on Earth dark side)
+    this.satFillLight = new THREE.PointLight(0x00e5ff, 2.5, 15);
+    this.scene.add(this.satFillLight);
 
     // Secondary earthshine bounce
     this.earthshineLight = new THREE.DirectionalLight(0x2266aa, 0.35);
@@ -163,7 +171,10 @@ export class SpaceScene {
 
     if (mode === 'ORBITAL') {
       this.controls.target.set(0, 0, 0);
-      this.camera.position.set(0, 3.2, 8.6);
+      const isMobileAspect = (this.width / this.height) < 1.0;
+      const targetDist = isMobileAspect ? 13.8 : 8.6;
+      const targetY = isMobileAspect ? 4.5 : 3.2;
+      this.camera.position.set(0, targetY, targetDist);
       this.controls.minDistance = 3.25;
       this.controls.maxDistance = 50.0;
     } else if (mode === 'CHASER') {
@@ -181,6 +192,9 @@ export class SpaceScene {
 
   updateCamera(sat3DPos) {
     if (!this.controls || !sat3DPos) return;
+    if (this.satFillLight) {
+      this.satFillLight.position.copy(sat3DPos).add(new THREE.Vector3(0.5, 0.5, 0.8));
+    }
 
     if (this.viewMode === 'CHASER') {
       if (this.lastSatPos.lengthSq() > 0) {

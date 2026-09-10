@@ -6,7 +6,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>CubeSat AOCS Flight Simulator | 3D Interactive LEO Orbit &amp; Attitude Control</title>
 <meta content="Interactive 3D Attitude Determination &amp; Control System (AOCS) flight simulator for Low Earth Orbit nanosatellites. Implements B-dot detumbling, reaction wheel nadir pointing, Sun tracking, and Aalborg ground station slew." name="description"/>
-<link href="css/aocs.css?v=12.0" rel="stylesheet"/>
+<link href="css/aocs.css?v=14.0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
@@ -99,6 +99,27 @@
 </label>
 </div>
 </div>
+<!-- Collapsible Sim & Time Warp Popover -->
+<div class="vector-menu-wrapper">
+<button class="hud-pill btn-vector-toggle" id="btn-toggle-warp">
+<span>⏱️ <span class="val-timewarp-badge">1x</span> WARP</span>
+<span id="warp-caret">▾</span>
+</button>
+<div class="vector-popover" id="warp-popover" style="min-width: 220px;">
+<div class="vector-popover-title">SIMULATION SPEED &amp; TIME WARP</div>
+<div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+<span style="color: var(--text-dim); font-size: 11px;">WARP:</span>
+<input class="slider-timewarp-input" id="slider-timewarp-quick" max="30" min="1" step="1" type="range" value="1" style="flex: 1;" />
+<span class="val-timewarp-text" id="val-timewarp-quick" style="color: var(--accent-cyan); font-weight: bold; width: 32px; text-align: right;">1x</span>
+</div>
+<div style="display: flex; gap: 6px;">
+<button class="btn-action btn-pause-toggle" id="btn-pause-quick" style="flex: 1; padding: 5px 6px; font-size: 11px;">⏸ PAUSE</button>
+<button class="btn-action btn-danger btn-tumble-trigger" id="btn-tumble-quick" style="flex: 1; padding: 5px 6px; font-size: 11px;">⚡ TUMBLE</button>
+</div>
+</div>
+</div>
+</div>
 </div>
 <!-- Tactical Viewport Geographic Coordinates Banner -->
 <div class="viewport-coord-banner" id="viewport-coord-banner">
@@ -128,12 +149,34 @@
 <span id="drawerToggleText">▲ OPEN CONTROLS</span>
 </div>
 </div><div class="mobile-drawer-body" id="mobileDrawerBody">
-<!-- Flight Mode FSM -->
-<div class="panel-header">
-<span>AOCS FLIGHT MODES</span>
-<span style="font-size: 10px; color: var(--text-dim);">FINITE STATE MACHINE</span>
+<!-- 1. Simulation Runtime & Time Warp Control -->
+<div class="panel-header collapsible-header" data-target="panel-warp">
+  <div style="display: flex; align-items: center; gap: 6px;">
+    <span>⚡ SIMULATION &amp; TIME WARP</span>
+  </div>
+  <span class="accordion-arrow">▾</span>
 </div>
-<div class="panel-section">
+<div class="panel-section" id="panel-warp">
+  <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px;">
+    <span style="color: var(--text-dim); font-size: 12px; font-weight: 600;">WARP RATE:</span>
+    <input class="slider-timewarp-input" id="slider-timewarp" max="30" min="1" step="1" type="range" value="1" style="flex: 1;" />
+    <span class="val-timewarp-text" id="val-timewarp" style="color: var(--accent-cyan); font-weight: 700; width: 32px; text-align: right;">1x</span>
+  </div>
+  <div style="display: flex; gap: 8px;">
+    <button class="btn-action btn-pause-toggle" id="btn-pause" style="flex: 1;">⏸ PAUSE</button>
+    <button class="btn-action btn-danger btn-tumble-trigger" id="btn-tumble" style="flex: 1;">⚡ TUMBLE SATELLITE</button>
+  </div>
+</div>
+
+<!-- 2. Flight Mode FSM -->
+<div class="panel-header collapsible-header" data-target="panel-modes">
+  <div style="display: flex; align-items: center; gap: 6px;">
+    <span>🎮 AOCS FLIGHT MODES</span>
+    <span style="font-size: 9px; color: var(--text-dim);">(FSM)</span>
+  </div>
+  <span class="accordion-arrow">▾</span>
+</div>
+<div class="panel-section" id="panel-modes">
 <div class="mode-selector-grid">
 <button class="btn-mode active" data-mode="DETUMBLE">
 <span>B-DOT DETUMBLE</span>
@@ -157,15 +200,16 @@
 <span class="sub-label">Magnetic Momentum Dump • m = -k (B × h) / |B|²</span>
 </button>
 <div style="display: flex; gap: 8px; margin-top: 4px;">
-<button class="btn-action btn-danger" id="btn-tumble" style="flex: 1;">⚡ TUMBLE SATELLITE</button>
 <button class="btn-action" id="btn-reset-wheels" style="flex: 1;">🔄 ZERO WHEELS</button>
 </div>
 </div>
-<!-- Telemetry: Attitude & Dynamics -->
-<div class="panel-header">
-<span>ATTITUDE STATE &amp; KINEMATICS</span>
+
+<!-- 3. Telemetry: Attitude & Dynamics -->
+<div class="panel-header collapsible-header" data-target="panel-attitude">
+  <span>📡 ATTITUDE STATE &amp; KINEMATICS</span>
+  <span class="accordion-arrow">▸</span>
 </div>
-<div class="panel-section">
+<div class="panel-section is-collapsed" id="panel-attitude">
 <div class="telem-row">
 <span class="telem-label">EULER [R, P, Y]:</span>
 <span class="telem-val" id="val-euler">R:0.0° P:0.0° Y:0.0°</span>
@@ -183,11 +227,13 @@
 <span class="telem-val" id="val-kinetic">0.00 mJ</span>
 </div>
 </div>
-<!-- Actuators HUD: Reaction Wheels & Magnetorquers -->
-<div class="panel-header">
-<span>ACTUATORS STATE</span>
+
+<!-- 4. Actuators HUD: Reaction Wheels & Magnetorquers -->
+<div class="panel-header collapsible-header" data-target="panel-actuators">
+  <span>⚙️ ACTUATORS STATE</span>
+  <span class="accordion-arrow">▸</span>
 </div>
-<div class="panel-section">
+<div class="panel-section is-collapsed" id="panel-actuators">
 <div class="section-title">3-AXIS REACTION WHEELS (MAX 6500 RPM)</div>
 <div class="gauge-container">
 <div class="gauge-label-row"><span>WHEEL X</span><span id="rw-val-x">0 RPM</span></div>
@@ -215,11 +261,13 @@
 <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="mtq-bar-z" style="width: 0%; background: #ff6d00;"></div></div>
 </div>
 </div>
-<!-- Orbit & Ground Station Telemetry -->
-<div class="panel-header">
-<span>ORBIT &amp; AALBORG GS LINK</span>
+
+<!-- 5. Orbit & Ground Station Telemetry -->
+<div class="panel-header collapsible-header" data-target="panel-orbit">
+  <span>🌍 ORBIT &amp; AALBORG GS LINK</span>
+  <span class="accordion-arrow">▸</span>
 </div>
-<div class="panel-section">
+<div class="panel-section is-collapsed" id="panel-orbit">
 <div class="telem-row">
 <span class="telem-label">SUB-SAT (SSP):</span>
 <span class="telem-val" id="val-ssp" style="color: var(--accent-cyan); font-weight: 700;">57.05° N, 09.92° E</span>
@@ -257,27 +305,21 @@
 <span class="telem-val" id="val-gs-link">LOS (OUT OF SIGHT)</span>
 </div>
 </div>
+
+<!-- 6. Mission Telemetry Real-Time Strip Chart -->
+<div class="panel-header collapsible-header" data-target="panel-chart">
+  <span>📈 MISSION TELEMETRY CHART</span>
+  <span class="accordion-arrow">▸</span>
+</div>
+<div class="panel-section is-collapsed" id="panel-chart">
+  <div style="color: var(--text-dim); font-size: 11px; margin-bottom: 6px;">20 Hz RK4 Angular Velocity Damping |ω|:</div>
+  <div class="strip-canvas-box" style="height: 110px; width: 100%;">
+    <canvas id="chart-canvas" style="width: 100%; height: 100%;"></canvas>
+  </div>
+</div>
 </div></aside>
 </div>
-<!-- Bottom Telemetry Strip Chart -->
-<footer class="bottom-strip">
-<div class="strip-metrics">
-<div style="font-weight: 700; color: var(--accent-cyan);">MISSION TELEMETRY STRIP</div>
-<div style="color: var(--text-dim); font-size: 11px;">Sampling rate: 20 Hz (RK4 Integrator)</div>
-<div style="color: var(--text-dim); font-size: 11px;">CubeSat Space Protocol (CSP) / CAN Bus Telemetry</div>
-</div>
-<div class="strip-canvas-box">
-<canvas id="chart-canvas"></canvas>
-</div>
-<div class="strip-controls">
-<div class="slider-group">
-<span style="color: var(--text-dim);">WARP:</span>
-<input id="slider-timewarp" max="30" min="1" step="1" type="range" value="1"/>
-<span id="val-timewarp" style="color: var(--accent-cyan); width: 32px;">1x</span>
-</div>
-<button class="btn-action" id="btn-pause" style="width: 100%;">⏸ PAUSE</button>
-</div>
-</footer>
+
 </div>
 <!-- Help & Technical Whitepaper Modal -->
 <div class="modal-overlay" id="help-modal">
@@ -306,7 +348,7 @@
 </div>
 </div>
 <!-- Application Script -->
-<script src="js/app.js?v=12.0" type="module"></script>
+<script src="js/app.js?v=14.0" type="module"></script>
 <div class="guide-modal-footer">
 <button class="btn-guide-start" id="guideStart">🚀 Start Interactive Simulator</button>
 </div>
@@ -511,17 +553,7 @@
         });
     }
 
-    // Auto-launch tour on first visit
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            try {
-                const done = sessionStorage.getItem(tourKey);
-                if (!done) startTour();
-            } catch(e) {
-                startTour();
-            }
-        }, 500);
-    });
+    // Tour launched only on explicit button tap
 
     if (window.location.search.indexOf('tour') !== -1) {
         setTimeout(startTour, 350);

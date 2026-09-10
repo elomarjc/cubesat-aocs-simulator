@@ -98,21 +98,6 @@ class CubeSatApp {
       this.dynamics.resetWheels();
     });
 
-    // Camera View Modes
-    // Vector popover menu toggle
-    const vecBtn = document.getElementById('btn-toggle-vectors');
-    const vecPopover = document.getElementById('vector-popover');
-    vecBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      vecPopover?.classList.toggle('open');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!vecPopover?.contains(e.target) && e.target !== vecBtn) {
-        vecPopover?.classList.remove('open');
-      }
-    });
-
     document.getElementById('select-view')?.addEventListener('change', (e) => {
       this.scene.setViewMode(e.target.value, this.currentSat3DPos);
     });
@@ -124,18 +109,75 @@ class CubeSatApp {
       this.earth.generateOrbitTrack(this.orbit);
     });
 
-    // Time Warp Slider
-    const warpSlider = document.getElementById('slider-timewarp');
-    const warpVal = document.getElementById('val-timewarp');
-    warpSlider?.addEventListener('input', (e) => {
-      this.timeWarp = parseFloat(e.target.value);
-      if (warpVal) warpVal.textContent = `${this.timeWarp}x`;
+    // Vector & Warp popover menus
+    const vecBtn = document.getElementById('btn-toggle-vectors');
+    const vecPopover = document.getElementById('vector-popover');
+    const warpBtn = document.getElementById('btn-toggle-warp');
+    const warpPopover = document.getElementById('warp-popover');
+
+    vecBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      vecPopover?.classList.toggle('open');
+      warpPopover?.classList.remove('open');
     });
 
-    // Pause/Play
-    document.getElementById('btn-pause')?.addEventListener('click', (e) => {
-      this.isPaused = !this.isPaused;
-      e.target.textContent = this.isPaused ? '▶ RESUME' : '⏸ PAUSE';
+    warpBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      warpPopover?.classList.toggle('open');
+      vecPopover?.classList.remove('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!vecPopover?.contains(e.target) && e.target !== vecBtn) {
+        vecPopover?.classList.remove('open');
+      }
+      if (!warpPopover?.contains(e.target) && e.target !== warpBtn) {
+        warpPopover?.classList.remove('open');
+      }
+    });
+
+    // Collapsible drawer accordions
+    document.querySelectorAll('.collapsible-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const isCollapsed = header.classList.toggle('is-collapsed');
+        const arrow = header.querySelector('.accordion-arrow');
+        if (arrow) arrow.textContent = isCollapsed ? '▸' : '▾';
+        const targetId = header.getAttribute('data-target');
+        const sec = targetId ? document.getElementById(targetId) : header.nextElementSibling;
+        if (sec) sec.classList.toggle('is-collapsed', isCollapsed);
+      });
+    });
+
+    // Synchronized Time Warp Sliders (drawer + HUD quick popover)
+    const warpSliders = document.querySelectorAll('.slider-timewarp-input');
+    const warpVals = document.querySelectorAll('.val-timewarp-text');
+    const warpBadges = document.querySelectorAll('.val-timewarp-badge');
+    warpSliders.forEach(slider => {
+      slider.addEventListener('input', (e) => {
+        this.timeWarp = parseFloat(e.target.value);
+        warpSliders.forEach(s => { s.value = this.timeWarp; });
+        warpVals.forEach(v => { v.textContent = `${this.timeWarp}x`; });
+        warpBadges.forEach(b => { b.textContent = `${this.timeWarp}x`; });
+      });
+    });
+
+    // Synchronized Pause/Play buttons
+    const pauseBtns = document.querySelectorAll('.btn-pause-toggle');
+    pauseBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.isPaused = !this.isPaused;
+        pauseBtns.forEach(b => {
+          b.textContent = this.isPaused ? '▶ RESUME' : '⏸ PAUSE';
+        });
+      });
+    });
+
+    // Tumble Satellite triggers
+    const tumbleBtns = document.querySelectorAll('.btn-tumble-trigger');
+    tumbleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.physics.tumble();
+      });
     });
 
     // Vector Toggles

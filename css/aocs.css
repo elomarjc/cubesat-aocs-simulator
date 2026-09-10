@@ -211,8 +211,8 @@ body {
   display: none;
   position: absolute;
   top: 36px;
-  right: 0;
-  background: rgba(10, 17, 34, 0.95);
+  left: 0;
+  background: rgba(10, 17, 34, 0.96);
   backdrop-filter: blur(14px);
   border: 1px solid rgba(0, 229, 255, 0.35);
   border-radius: 6px;
@@ -835,6 +835,15 @@ body {
     padding: 0 !important;
     z-index: 1 !important;
   }
+  .bottom-strip {
+    display: none !important;
+  }
+  .vector-popover {
+    left: 0 !important;
+    right: auto !important;
+    top: 40px !important;
+    max-width: 85vw !important;
+  }
   #three-canvas-container, #three-canvas-container canvas {
     width: 100% !important;
     height: 100% !important;
@@ -1040,8 +1049,8 @@ body {
     left: 0 !important;
     right: 0 !important;
     z-index: 9000 !important;
-    max-height: 58vh !important;
-    height: 58vh !important;
+    max-height: 44vh !important;
+    height: auto !important;
     background: rgba(8, 13, 24, 0.95) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
@@ -1103,6 +1112,24 @@ body {
     padding: 12px 14px 48px !important;
   }
 
+  
+  /* Sleek Compact Drawer Accordion Cards */
+  .mobile-drawer-body .card,
+  .mobile-drawer-body .panel,
+  .mobile-drawer-body .control-card {
+    margin-bottom: 8px !important;
+    border-radius: 10px !important;
+    background: rgba(15, 23, 42, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+  .mobile-drawer-body .card-header,
+  .mobile-drawer-body .panel-header {
+    padding: 8px 12px !important;
+    font-size: 0.76rem !important;
+    cursor: pointer !important;
+    user-select: none !important;
+  }
+
   /* Mobile touch controls optimization */
   input[type=range] {
     height: 38px !important;
@@ -1125,6 +1152,39 @@ body {
     padding: 6px 12px !important;
     font-size: 0.72rem !important;
   }
+  #warp-popover {
+    left: 0 !important;
+    right: auto !important;
+    top: 40px !important;
+    max-width: 85vw !important;
+  }
+}
+
+/* Collapsible Accordion Cards for Mobile & Desktop */
+.collapsible-header {
+  cursor: pointer !important;
+  user-select: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 9px 12px !important;
+  background: rgba(14, 23, 42, 0.95) !important;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.2) !important;
+  border-radius: 6px !important;
+  margin-top: 6px !important;
+  transition: all 0.2s ease !important;
+}
+.collapsible-header:hover, .collapsible-header:active {
+  background: rgba(0, 229, 255, 0.15) !important;
+}
+.accordion-arrow {
+  font-size: 12px !important;
+  color: var(--accent-cyan, #00e5ff) !important;
+  display: inline-block !important;
+  font-weight: 800 !important;
+}
+.panel-section.is-collapsed {
+  display: none !important;
 }
 
 /* Desktop layout rules */
@@ -1135,4 +1195,25 @@ body {
   .mobile-drawer-body {
     display: contents !important;
   }
+}
+
+
+/* Universal Mobile Drawer Accordions */
+.accordion-arrow {
+  font-size: 13px !important;
+  color: #ffd600 !important;
+  margin-left: auto !important;
+  padding-left: 8px !important;
+  display: inline-block !important;
+  font-weight: 800 !important;
+  transition: transform 0.2s ease !important;
+}
+.mobile-drawer-body .card-header,
+.mobile-drawer-body .card-title,
+.mobile-drawer-body .panel-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  cursor: pointer !important;
+  user-select: none !important;
 }
