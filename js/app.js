@@ -62,6 +62,10 @@ class CubeSatApp {
     this.dynamics.setTipOffRates(5, 20, 15);
 
     // Setup event handlers
+    // Initialize real 3D orbit track and camera
+    this.earth.generateOrbitTrack(this.orbit);
+    this.scene.setViewMode('ORBITAL');
+
     this.setupUIBindings();
 
     // Start Main Simulation Loop
@@ -96,14 +100,14 @@ class CubeSatApp {
 
     // Camera View Modes
     document.getElementById('select-view')?.addEventListener('change', (e) => {
-      this.scene.setViewMode(e.target.value);
+      this.scene.setViewMode(e.target.value, this.currentSat3DPos);
     });
 
     // Orbit Presets
     document.getElementById('select-orbit')?.addEventListener('change', (e) => {
       const preset = e.target.value;
       this.orbit.setPreset(preset);
-      this.earth.updateOrbitTrack(this.orbit.inclination, this.orbit.altitude);
+      this.earth.generateOrbitTrack(this.orbit);
     });
 
     // Time Warp Slider
@@ -215,13 +219,21 @@ class CubeSatApp {
     }
 
     // 5. Update 3D Graphics
-    const sat3DPos = new THREE.Vector3(0, 0, 0); // In chaser mode, satellite stays centered
-    this.satMesh.update(dynState.q, dynState.wheelRPM, sat3DPos);
+    const scale = this.earth.satScaleRatio;
+    const sat3DPos = new THREE.Vector3(
+      orbState.positionECI.x * scale,
+      orbState.positionECI.z * scale,
+      -orbState.positionECI.y * scale
+    );
+    this.currentSat3DPos = sat3DPos;
+
+    this.scene.updateCamera(sat3DPos);
+    this.satMesh.update(dynState.q, dynState.wheelRPM, sat3DPos, this.scene.viewMode);
     this.earth.update(this.simTime, sat3DPos, gsInfo.hasLOS, this.orbit.getAalborgGSECI(this.simTime));
     this.scene.updateSunPosition(sunECI);
 
     const bECI = this.mag.getFieldECI(orbState.positionECI, this.simTime);
-    this.vectors.update(sat3DPos, bECI, sunECI, orbState.nadirECI, cmdTorqueRW, cmdDipoleMTQ);
+    this.vectors.update(sat3DPos, bECI, sunECI, orbState.nadirECI, cmdTorqueRW, cmdDipoleMTQ, this.satMesh.group.quaternion);
 
     // 6. Update HUD & Telemetry Logging
     this.hud.update(

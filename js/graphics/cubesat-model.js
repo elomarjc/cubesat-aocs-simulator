@@ -2,7 +2,8 @@
  * Detailed Procedural 3U CubeSat 3D Model
  * Dimensions: 10cm x 10cm x 34cm (scaled to 0.1 x 0.1 x 0.34 in 3D units)
  * Features: Space-grade aluminum chassis, gold MLI insulation, solar arrays,
- * 3 orthogonal reaction wheel flywheels, magnetorquer coil rods, payload camera, and body axes triad.
+ * 3 orthogonal reaction wheel flywheels, magnetorquer coil rods, payload camera,
+ * body axes triad, and orbital locator beacon.
  */
 
 export class CubeSatModel {
@@ -17,6 +18,7 @@ export class CubeSatModel {
     this.setupInternalActuators();
     this.setupAntennas();
     this.setupBodyAxes();
+    this.setupBeacon();
   }
 
   setupChassis() {
@@ -177,14 +179,66 @@ export class CubeSatModel {
     this.group.add(this.axesHelper);
   }
 
+  setupBeacon() {
+    // Glowing beacon billboard sprite for orbital view
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 30);
+    grad.addColorStop(0, 'rgba(0, 229, 255, 1.0)');
+    grad.addColorStop(0.35, 'rgba(0, 200, 255, 0.7)');
+    grad.addColorStop(0.7, 'rgba(0, 100, 255, 0.25)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 64, 64);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({
+      map: texture,
+      color: 0x00e5ff,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    this.beaconSprite = new THREE.Sprite(spriteMat);
+    this.beaconSprite.scale.set(0.55, 0.55, 1.0);
+    this.group.add(this.beaconSprite);
+
+    // Orbit locator ring
+    const ringGeom = new THREE.RingGeometry(0.14, 0.17, 32);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0x00e5ff,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.6
+    });
+    this.locatorRing = new THREE.Mesh(ringGeom, ringMat);
+    this.group.add(this.locatorRing);
+  }
+
   /**
    * Update satellite orientation from attitude quaternion [q0, q1, q2, q3]
-   * and rotate reaction wheels based on current RPM
+   * and position in 3D orbit around the Earth
    */
-  update(qAttitude, wheelRPM, sat3DPos = new THREE.Vector3(0,0,0)) {
-    // Three.js quaternion convention: (x, y, z, w) where w is scalar
-    this.group.quaternion.set(qAttitude.q1, qAttitude.q2, qAttitude.q3, qAttitude.q0);
+  update(qAttitude, wheelRPM, sat3DPos = new THREE.Vector3(0,0,0), viewMode = 'ORBITAL') {
+    // Astrodynamics ECI to Three.js coordinates:
+    // Rotate around X by -90 deg so that +Z_ECI (North) maps to +Y_3D (North)
+    const q_ECI_to_3D = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
+    const qSat = new THREE.Quaternion(qAttitude.q1, qAttitude.q2, qAttitude.q3, qAttitude.q0);
+    this.group.quaternion.copy(q_ECI_to_3D).multiply(qSat);
     this.group.position.copy(sat3DPos);
+
+    // Dynamic visual scale & beacon based on camera view mode
+    if (viewMode === 'ORBITAL') {
+      this.group.scale.setScalar(2.2); // Clearly visible spacecraft structure in global Earth view
+      if (this.beaconSprite) this.beaconSprite.visible = true;
+      if (this.locatorRing) this.locatorRing.visible = true;
+    } else {
+      this.group.scale.setScalar(1.0); // 1:1 true scale in close-up chaser camera
+      if (this.beaconSprite) this.beaconSprite.visible = false;
+      if (this.locatorRing) this.locatorRing.visible = false;
+    }
 
     // Spin reaction wheel meshes
     if (this.wheelMeshX) this.wheelMeshX.rotation.y += (wheelRPM.x * 0.001);

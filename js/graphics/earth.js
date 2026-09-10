@@ -86,7 +86,7 @@ export class EarthVisualizer {
 
     const earthTexture = new THREE.CanvasTexture(canvas);
 
-    const earthGeom = new THREE.SphereGeometry(this.earthScale, 48, 48);
+    const earthGeom = new THREE.SphereGeometry(this.earthScale, 64, 64);
     const earthMat = new THREE.MeshStandardMaterial({
       map: earthTexture,
       roughness: 0.8,
@@ -103,7 +103,7 @@ export class EarthVisualizer {
     const atmoMat = new THREE.MeshBasicMaterial({
       color: 0x00b0ff,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.18,
       side: THREE.BackSide
     });
     this.atmosphere = new THREE.Mesh(atmoGeom, atmoMat);
@@ -111,25 +111,37 @@ export class EarthVisualizer {
   }
 
   setupOrbitTrack() {
-    // Visual circle/ellipse representing orbit path
-    const orbitRadius = this.earthScale * (CONSTANTS.EARTH_RADIUS + 500e3) / CONSTANTS.EARTH_RADIUS;
-    const curvePoints = [];
-    const segments = 128;
-    for (let i = 0; i <= segments; i++) {
-      const theta = (i / segments) * Math.PI * 2;
-      curvePoints.push(new THREE.Vector3(orbitRadius * Math.cos(theta), 0, orbitRadius * Math.sin(theta)));
-    }
-
-    const orbitGeom = new THREE.BufferGeometry().setFromPoints(curvePoints);
+    const orbitGeom = new THREE.BufferGeometry();
     const orbitMat = new THREE.LineBasicMaterial({
       color: 0x00e5ff,
       transparent: true,
-      opacity: 0.4,
-      linewidth: 1
+      opacity: 0.65,
+      linewidth: 1.5
     });
-
     this.orbitLine = new THREE.Line(orbitGeom, orbitMat);
     this.scene.add(this.orbitLine);
+  }
+
+  /**
+   * Dynamically generate 3D orbit ring from Keplerian propagator state over full period
+   */
+  generateOrbitTrack(orbitPropagator) {
+    if (!orbitPropagator) return;
+    const segments = 256;
+    const period = orbitPropagator.period;
+    const positions = new Float32Array((segments + 1) * 3);
+    const scale = this.satScaleRatio;
+
+    for (let i = 0; i <= segments; i++) {
+      const t = (i / segments) * period;
+      const st = orbitPropagator.getState(t);
+      // ECI to Three.js coordinates: X = x, Y = z, Z = -y
+      positions[i * 3 + 0] = st.positionECI.x * scale;
+      positions[i * 3 + 1] = st.positionECI.z * scale;
+      positions[i * 3 + 2] = -st.positionECI.y * scale;
+    }
+    this.orbitLine.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    this.orbitLine.geometry.attributes.position.needsUpdate = true;
   }
 
   setupAalborgGroundStation() {
@@ -149,7 +161,7 @@ export class EarthVisualizer {
     const coneMat = new THREE.MeshBasicMaterial({
       color: 0x00e676,
       transparent: true,
-      opacity: 0.12,
+      opacity: 0.15,
       wireframe: true
     });
     this.radarCone = new THREE.Mesh(coneGeom, coneMat);
@@ -192,8 +204,8 @@ export class EarthVisualizer {
     this.gsGroup.position.set(gx, gy, gz);
     this.gsGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(gx, gy, gz).normalize());
 
-    // Update comm beam
-    if (hasLOS) {
+    // Update comm beam between Aalborg Ground Station and Satellite
+    if (hasLOS && sat3DPos) {
       this.commBeam.visible = true;
       const positions = this.commBeam.geometry.attributes.position.array;
       positions[0] = gx; positions[1] = gy; positions[2] = gz;
@@ -205,6 +217,7 @@ export class EarthVisualizer {
   }
 
   updateOrbitTrack(inclinationRad, altitudeMeters) {
+    // Backward compatibility if called without propagator
     const r3D = this.earthScale * (CONSTANTS.EARTH_RADIUS + altitudeMeters) / CONSTANTS.EARTH_RADIUS;
     this.orbitLine.rotation.x = inclinationRad - Math.PI / 2;
     this.orbitLine.scale.set(r3D / (this.earthScale * 1.078), r3D / (this.earthScale * 1.078), r3D / (this.earthScale * 1.078));
