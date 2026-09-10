@@ -1,10 +1,6 @@
 /**
  * Three.js 3D Scene, Camera, Lighting & Viewport Management
- * Features:
- * - Visually rendered incandescent Sun with golden photosphere & coronal lens flare
- * - Deep space starfield
- * - Earth & CubeSat lighting
- * - OrbitControls with mobile touch support and smart view tracking
+ * Places incandescent Sun with coronal flare in upper-right sky directly inside camera FOV.
  */
 
 export class SpaceScene {
@@ -18,9 +14,8 @@ export class SpaceScene {
 
     // 2. Camera - Global Orbital default viewing Earth and orbiting CubeSat
     this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.05, 10000);
-    this.camera.position.set(0, 3.2, 8.2); // Panoramic orbital view framing Earth and Sun
+    this.camera.position.set(0, 3.2, 8.6); // Panoramic orbital view
 
-    // Camera target modes: 'ORBITAL' (Earth centered), 'CHASER' (satellite tracking)
     this.viewMode = 'ORBITAL';
     this.lastSatPos = new THREE.Vector3(0, 0, 0);
 
@@ -38,7 +33,7 @@ export class SpaceScene {
       this.controls.enableDamping = true;
       this.controls.dampingFactor = 0.06;
       this.controls.target.set(0, 0, 0);
-      this.controls.minDistance = 3.25; // Prevents entering inside Earth (radius 3.0)
+      this.controls.minDistance = 3.25;
       this.controls.maxDistance = 50.0;
       this.controls.touches = {
         ONE: THREE.TOUCH.ROTATE,
@@ -52,54 +47,53 @@ export class SpaceScene {
     // 6. Deep Space Starfield
     this.setupStarfield();
 
-    // Handle Window Resize
     window.addEventListener('resize', () => this.onWindowResize());
   }
 
   setupSunAndLighting() {
     // Ambient starlight / Earthshine
-    this.ambientLight = new THREE.AmbientLight(0x101b33, 0.95);
+    this.ambientLight = new THREE.AmbientLight(0x101b33, 0.9);
     this.scene.add(this.ambientLight);
 
     // Primary Sun directional light
-    this.sunLight = new THREE.DirectionalLight(0xfffaed, 2.6);
+    this.sunLight = new THREE.DirectionalLight(0xfffaed, 2.8);
     this.scene.add(this.sunLight);
 
     // Secondary earthshine bounce
-    this.earthshineLight = new THREE.DirectionalLight(0x2266aa, 0.4);
+    this.earthshineLight = new THREE.DirectionalLight(0x2266aa, 0.35);
     this.earthshineLight.position.set(0, -100, 0);
     this.scene.add(this.earthshineLight);
 
-    // 3D Visual Sun Group (Visible Star in the sky)
+    // 3D Visual Sun Group (Placed in upper-right sky inside FOV)
     this.sunGroup = new THREE.Group();
     this.scene.add(this.sunGroup);
 
     // 1. Incandescent White Sun Core
-    const sunGeom = new THREE.SphereGeometry(2.2, 32, 32);
+    const sunGeom = new THREE.SphereGeometry(1.6, 32, 32);
     const sunMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const sunCore = new THREE.Mesh(sunGeom, sunMat);
     this.sunGroup.add(sunCore);
 
-    // 2. Solar Photosphere Layer
-    const photoGeom = new THREE.SphereGeometry(2.7, 32, 32);
+    // 2. Photosphere Glow Layer
+    const photoGeom = new THREE.SphereGeometry(2.1, 32, 32);
     const photoMat = new THREE.MeshBasicMaterial({
       color: 0xffd54f,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.88
     });
     const photosphere = new THREE.Mesh(photoGeom, photoMat);
     this.sunGroup.add(photosphere);
 
-    // 3. Glowing Solar Corona Flare Billboard Sprite
+    // 3. Coronal Flare Billboard Sprite
     const canvas = document.createElement('canvas');
     canvas.width = 128;
     canvas.height = 128;
     const ctx = canvas.getContext('2d');
     const grad = ctx.createRadialGradient(64, 64, 2, 64, 64, 62);
     grad.addColorStop(0, '#ffffff');
-    grad.addColorStop(0.12, 'rgba(255, 250, 210, 0.95)');
-    grad.addColorStop(0.32, 'rgba(255, 235, 59, 0.8)');
-    grad.addColorStop(0.62, 'rgba(255, 152, 0, 0.35)');
+    grad.addColorStop(0.15, 'rgba(255, 250, 210, 0.95)');
+    grad.addColorStop(0.35, 'rgba(255, 235, 59, 0.8)');
+    grad.addColorStop(0.65, 'rgba(255, 152, 0, 0.35)');
     grad.addColorStop(0.85, 'rgba(255, 87, 34, 0.12)');
     grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = grad;
@@ -113,16 +107,17 @@ export class SpaceScene {
       depthWrite: false
     });
     this.coronaSprite = new THREE.Sprite(coronaMat);
-    this.coronaSprite.scale.set(20.0, 20.0, 1.0);
+    this.coronaSprite.scale.set(14.0, 14.0, 1.0);
     this.sunGroup.add(this.coronaSprite);
 
-    // Initial position along +X at distance 48
-    this.sunGroup.position.set(48, 8, -5);
-    this.sunLight.position.set(48, 8, -5);
+    // Default position in upper-right sky (visible inside mobile FOV)
+    const defaultSunPos = new THREE.Vector3(12, 7, -6);
+    this.sunGroup.position.copy(defaultSunPos);
+    this.sunLight.position.copy(defaultSunPos);
   }
 
   setupStarfield() {
-    const starCount = 2500;
+    const starCount = 2200;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
@@ -132,7 +127,7 @@ export class SpaceScene {
       const v = Math.random();
       const theta = 2 * Math.PI * u;
       const phi = Math.acos(2 * v - 1);
-      const r = 800 + Math.random() * 200;
+      const r = 700 + Math.random() * 200;
 
       positions[i] = r * Math.sin(phi) * Math.cos(theta);
       positions[i + 1] = r * Math.sin(phi) * Math.sin(theta);
@@ -140,11 +135,11 @@ export class SpaceScene {
 
       const colorType = Math.random();
       if (colorType > 0.8) {
-        colors[i] = 1.0; colors[i + 1] = 0.88; colors[i + 2] = 0.72; // Warm gold
+        colors[i] = 1.0; colors[i + 1] = 0.88; colors[i + 2] = 0.72;
       } else if (colorType > 0.3) {
-        colors[i] = 0.92; colors[i + 1] = 0.96; colors[i + 2] = 1.0; // Pure white
+        colors[i] = 0.92; colors[i + 1] = 0.96; colors[i + 2] = 1.0;
       } else {
-        colors[i] = 0.75; colors[i + 1] = 0.88; colors[i + 2] = 1.0; // Blue giant
+        colors[i] = 0.75; colors[i + 1] = 0.88; colors[i + 2] = 1.0;
       }
     }
 
@@ -152,7 +147,7 @@ export class SpaceScene {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 1.6,
+      size: 1.5,
       vertexColors: true,
       transparent: true,
       opacity: 0.85
@@ -168,7 +163,7 @@ export class SpaceScene {
 
     if (mode === 'ORBITAL') {
       this.controls.target.set(0, 0, 0);
-      this.camera.position.set(0, 3.2, 8.2);
+      this.camera.position.set(0, 3.2, 8.6);
       this.controls.minDistance = 3.25;
       this.controls.maxDistance = 50.0;
     } else if (mode === 'CHASER') {
@@ -177,7 +172,7 @@ export class SpaceScene {
       if (sat3DPos) {
         this.controls.target.copy(sat3DPos);
         const toEarth = sat3DPos.clone().normalize();
-        const camOffset = toEarth.clone().multiplyScalar(0.4).add(new THREE.Vector3(0.4, 0.3, 0.5));
+        const camOffset = toEarth.clone().multiplyScalar(0.4).add(new THREE.Vector3(0.35, 0.25, 0.45));
         this.camera.position.copy(sat3DPos).add(camOffset);
         this.lastSatPos.copy(sat3DPos);
       }
@@ -201,10 +196,16 @@ export class SpaceScene {
 
   updateSunPosition(sECI) {
     if (!sECI) return;
-    // ECI to Three.js coordinates: (x, z, -y)
+    // Map astrodynamics ECI to Three.js coordinates: (x, z, -y)
     const s3D = new THREE.Vector3(sECI.x, sECI.z, -sECI.y).normalize();
-    const sunDist = 48.0;
-    const sunPos = s3D.clone().multiplyScalar(sunDist);
+
+    // Position Sun in upper-right sky at distance ~18 (inside mobile camera FOV)
+    const sunDist = 18.0;
+    const sunPos = new THREE.Vector3(
+      s3D.x * sunDist,
+      Math.max(4.0, s3D.y * sunDist + 4.0),
+      s3D.z * sunDist - 4.0
+    );
 
     this.sunGroup.position.copy(sunPos);
     this.sunLight.position.copy(sunPos);

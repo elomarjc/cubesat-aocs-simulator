@@ -233,12 +233,13 @@ class CubeSatApp {
     }
 
     // 5. Update 3D Graphics
-    const scale = this.earth.satScaleRatio;
-    const sat3DPos = new THREE.Vector3(
-      orbState.positionECI.x * scale,
-      orbState.positionECI.z * scale,
-      -orbState.positionECI.y * scale
-    );
+    // Position satellite at visual orbit radius (3.8 units) with 0.8 units clearance
+    const dir = new THREE.Vector3(
+      orbState.positionECI.x,
+      orbState.positionECI.z,
+      -orbState.positionECI.y
+    ).normalize();
+    const sat3DPos = dir.clone().multiplyScalar(this.earth.orbitBaseRadius);
     this.currentSat3DPos = sat3DPos;
 
     this.scene.updateCamera(sat3DPos);
