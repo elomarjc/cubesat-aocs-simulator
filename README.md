@@ -14,21 +14,11 @@ Engineered with aerospace-grade mathematical modeling, it reproduces the flight 
 
 ## 🚀 [Launch Interactive Live Simulator →](https://elomarjc.github.io/cubesat-aocs-simulator/)
 
-```
-       +-----------------------------------------------------------+
-       |           GOMSPACE AOCS FLIGHT SIMULATOR v2.4             |
-       +-----------------------------------------------------------+
-          /\                                                  /\
-         /  \               [ 3D SPACE VIEWPORT ]            /  \
-        /    \             Photorealistic Earth             /    \
-       / 3U   \           Rotating Geomagnetic B            / AAL  \
-      | CUBESAT|        3-Axis Reaction Wheels (RPM)       | GROUND|
-      | MODEL  |         Magnetorquer Dipoles (A*m²)       |STATION|
-       \      /         Nadir Payload Line-of-Sight         \ LINK /
-        \    /                                               \    /
-         \  /               [ MISSION CONTROL ]               \  /
-          \/          Live Telemetry • Strip Chart Damping     \/
-```
+<p align="center">
+  <a href="https://elomarjc.github.io/cubesat-aocs-simulator/">
+    <img src="assets/cubesat_sim_showcase.gif" width="100%" alt="3D CubeSat Orbital Flight Simulator" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+  </a>
+</p>
 
 ---
 
