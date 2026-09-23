@@ -16,7 +16,7 @@ Engineered with aerospace-grade mathematical modeling, it reproduces the flight 
 
 <p align="center">
   <a href="https://elomarjc.github.io/cubesat-aocs-simulator/">
-    <img src="assets/cubesat_sim_showcase.gif" width="50%" alt="3D CubeSat Orbital Flight Simulator" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+    <img src="assets/cubesat_sim_showcase.gif" width="100%" alt="3D CubeSat Orbital Flight Simulator" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
   </a>
 </p>
 
